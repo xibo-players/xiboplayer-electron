@@ -5,21 +5,23 @@
   "main": "src/main.js",
   "author": "TecMan <pau@tecman.cat>",
   "license": "AGPL-3.0",
-  "homepage": "https://github.com/xibo/xibo-players",
+  "homepage": "https://github.com/tecman/xibo_players",
   "repository": {
     "type": "git",
-    "url": "https://github.com/xibo/xibo-players.git"
+    "url": "https://github.com/tecman/xibo_players.git"
   },
   "scripts": {
     "start": "electron .",
     "dev": "electron . --dev",
-    "build": "electron-builder",
-    "build:linux": "electron-builder --linux",
-    "build:rpm": "electron-builder --linux rpm",
-    "build:deb": "electron-builder --linux deb",
-    "build:appimage": "electron-builder --linux AppImage",
-    "build:win": "electron-builder --windows",
-    "build:all": "electron-builder -mwl",
+    "build:pwa": "cd ../pwa && npm run build",
+    "build": "npm run build:pwa && electron-builder",
+    "build:linux": "npm run build:pwa && electron-builder --linux",
+    "build:rpm": "npm run build:pwa && electron-builder --linux rpm",
+    "build:deb": "npm run build:pwa && electron-builder --linux deb",
+    "build:appimage": "npm run build:pwa && electron-builder --linux AppImage",
+    "build:win": "npm run build:pwa && electron-builder --windows",
+    "build:all": "npm run build:pwa && electron-builder -mwl",
+    "build:electron-only": "electron-builder",
     "postinstall": "electron-builder install-app-deps"
   },
   "dependencies": {
@@ -42,12 +44,7 @@
     },
     "files": [
       "src/**/*",
-      "package.json",
-      "!node_modules/**/*",
-      "node_modules/electron-store/**/*",
-      "node_modules/express/**/*",
-      "node_modules/cors/**/*",
-      "node_modules/electron-auto-launch/**/*"
+      "package.json"
     ],
     "extraResources": [
       {
