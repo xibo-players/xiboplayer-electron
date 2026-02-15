@@ -59,6 +59,14 @@ const noKiosk = process.argv.includes('--no-kiosk');
 const portArg = process.argv.find(arg => arg.startsWith('--port='));
 const cliPort = portArg ? parseInt(portArg.split('=')[1], 10) : null;
 
+// Parse --cms-url=URL and --cms-key=KEY for auto-config injection
+const cmsUrlArg = process.argv.find(arg => arg.startsWith('--cms-url='));
+const cmsKeyArg = process.argv.find(arg => arg.startsWith('--cms-key='));
+const displayNameArg = process.argv.find(arg => arg.startsWith('--display-name='));
+const cliCmsUrl = cmsUrlArg ? cmsUrlArg.split('=').slice(1).join('=') : null;
+const cliCmsKey = cmsKeyArg ? cmsKeyArg.split('=').slice(1).join('=') : null;
+const cliDisplayName = displayNameArg ? displayNameArg.split('=').slice(1).join('=') : null;
+
 /**
  * Get the path to PWA dist files.
  * - Dev mode: uses ../pwa/dist (relative to electron-pwa source)
@@ -374,6 +382,38 @@ function createWindow() {
   const url = `http://localhost:${serverPort}/player/pwa/`;
 
   console.log(`[Window] Loading URL: ${url}`);
+
+  // Inject CMS config into PWA localStorage if CLI args provided.
+  // Always overwrite when --cms-url is given (authoritative), but preserve
+  // any existing hardwareKey so the display doesn't re-register.
+  if (cliCmsUrl) {
+    mainWindow.webContents.once('did-finish-load', () => {
+      mainWindow.webContents.executeJavaScript(`
+        (function() {
+          let existing = {};
+          try { existing = JSON.parse(localStorage.getItem('xibo_config') || '{}'); } catch(e) {}
+          const config = {
+            cmsAddress: ${JSON.stringify(cliCmsUrl)},
+            cmsKey: ${JSON.stringify(cliCmsKey || '')},
+            displayName: ${JSON.stringify(cliDisplayName || 'Electron Player')},
+            hardwareKey: existing.hardwareKey || '',
+            xmrChannel: existing.xmrChannel || ''
+          };
+          const prev = localStorage.getItem('xibo_config');
+          localStorage.setItem('xibo_config', JSON.stringify(config));
+          if (!prev || JSON.parse(prev).cmsAddress !== config.cmsAddress) {
+            location.reload();
+          }
+          return config.cmsAddress;
+        })()
+      `).then((addr) => {
+        console.log(`[Config] CMS config set: ${addr}`);
+      }).catch(err => {
+        console.error('[Config] Failed to inject config:', err.message);
+      });
+    });
+  }
+
   mainWindow.loadURL(url);
 
   // Show window when ready
