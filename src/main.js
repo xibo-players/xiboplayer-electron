@@ -14,10 +14,22 @@
 
 const { app, BrowserWindow, ipcMain, powerSaveBlocker, globalShortcut, Menu, Tray, dialog, nativeImage } = require('electron');
 const path = require('path');
+const fs = require('fs');
 const express = require('express');
 const cors = require('cors');
 const Store = require('electron-store');
 const AutoLaunch = require('electron-auto-launch');
+
+// GPU acceleration flags — must be set before app.whenReady()
+// Electron 40+ (Chromium 144) auto-detects Wayland via ozone-platform-hint=auto.
+// Do NOT force --ozone-platform=wayland — it breaks Vulkan/GL negotiation.
+app.commandLine.appendSwitch('ignore-gpu-blocklist');
+app.commandLine.appendSwitch('enable-gpu-rasterization');
+app.commandLine.appendSwitch('enable-zero-copy');
+app.commandLine.appendSwitch('enable-features',
+  'AcceleratedVideoDecodeLinuxGL,AcceleratedVideoDecodeLinuxZeroCopyGL,' +
+  'VaapiVideoDecoder,VaapiVideoEncoder,VaapiOnNvidiaGPUs,' +
+  'AcceleratedVideoEncoder,CanvasOopRasterization');
 
 // Version
 const APP_VERSION = '0.9.0';
@@ -184,6 +196,7 @@ function createExpressServer() {
       if (req.headers['content-type']) headers['Content-Type'] = req.headers['content-type'];
       if (req.headers['authorization']) headers['Authorization'] = req.headers['authorization'];
       if (req.headers['accept']) headers['Accept'] = req.headers['accept'];
+      if (req.headers['if-none-match']) headers['If-None-Match'] = req.headers['if-none-match'];
 
       const fetchOptions = {
         method: req.method,
@@ -196,9 +209,9 @@ function createExpressServer() {
 
       const response = await fetch(fullUrl, fetchOptions);
 
-      // Copy response headers
+      // Copy response headers (skip encoding headers — Node fetch already decompresses)
       response.headers.forEach((value, key) => {
-        if (!['transfer-encoding', 'connection'].includes(key.toLowerCase())) {
+        if (!['transfer-encoding', 'connection', 'content-encoding', 'content-length'].includes(key.toLowerCase())) {
           res.setHeader(key, value);
         }
       });
@@ -244,7 +257,7 @@ function createExpressServer() {
       // Copy response headers
       res.status(response.status);
       response.headers.forEach((value, key) => {
-        if (!['transfer-encoding', 'connection'].includes(key.toLowerCase())) {
+        if (!['transfer-encoding', 'connection', 'content-encoding', 'content-length'].includes(key.toLowerCase())) {
           res.setHeader(key, value);
         }
       });
@@ -282,7 +295,7 @@ function createExpressServer() {
   });
 
   // SPA fallback: sub-routes under /player/pwa/ serve index.html
-  expressApp.get('/player/pwa/*', (req, res) => {
+  expressApp.get('/player/pwa/{*splat}', (req, res) => {
     res.sendFile(path.join(pwaPath, 'index.html'));
   });
 
@@ -353,7 +366,20 @@ function createWindow() {
   mainWindow.webContents.session.webRequest.onHeadersReceived((details, callback) => {
     const headers = details.responseHeaders || {};
 
-    // Add CORS headers to all responses
+    // Remove any existing CORS headers to prevent duplication
+    // (e.g. SWAG/nginx already adds Access-Control-Allow-Origin: *,
+    //  and a second * from us makes the browser reject the response)
+    for (const key of Object.keys(headers)) {
+      const lk = key.toLowerCase();
+      if (lk === 'access-control-allow-origin' ||
+          lk === 'access-control-allow-methods' ||
+          lk === 'access-control-allow-headers' ||
+          lk === 'access-control-max-age') {
+        delete headers[key];
+      }
+    }
+
+    // Set CORS headers (single source of truth)
     headers['Access-Control-Allow-Origin'] = ['*'];
     headers['Access-Control-Allow-Methods'] = ['GET, POST, PUT, DELETE, OPTIONS'];
     headers['Access-Control-Allow-Headers'] = ['Content-Type, SOAPAction, Authorization, Accept'];

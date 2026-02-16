@@ -292,11 +292,30 @@ The renderer process runs in a sandbox with:
 
 The PWA sets appropriate CSP headers to prevent XSS attacks.
 
+### GPU Hardware Acceleration
+
+The player enables GPU-accelerated video decode and compositing via command-line flags
+(`ignore-gpu-blocklist`, `enable-gpu-rasterization`, `VaapiVideoDecoder`, etc.).
+
+For hardware video decode, install the appropriate VAAPI driver for your GPU:
+
+| GPU | Package (Fedora) | Notes |
+|-----|-------------------|-------|
+| Intel | `libva-intel-media-driver` | Works out of the box on most distros |
+| AMD | `mesa-va-drivers` | Included with Mesa |
+| NVIDIA | `libva-nvidia-driver` | RPM Fusion; bridges VAAPI → NVDEC |
+
+Verify with `vainfo`:
+```bash
+sudo dnf install libva-utils
+vainfo
+```
+
 ### CORS Configuration
 
-The Express server enables CORS only for:
-- PWA assets (localhost)
-- XMDS API endpoints (configured CMS URL)
+Electron strips any existing CORS headers from server responses and replaces them
+with its own `Access-Control-Allow-Origin: *`. This prevents double-header issues
+when reverse proxies (e.g. SWAG/nginx) also add CORS headers.
 
 ### Permissions
 
@@ -336,11 +355,11 @@ sudo rpm -i --force xibo-player-*.rpm
 
 ### CORS errors
 
-Make sure your CMS allows requests from `http://localhost:8765`.
+Electron automatically strips existing CORS headers from server responses and replaces them with its own `Access-Control-Allow-Origin: *`. This prevents double-header issues when reverse proxies (e.g. SWAG/nginx) also add CORS headers.
 
-In the CMS, add to allowed origins:
-- `http://localhost:8765`
-- `http://127.0.0.1:8765`
+If you still see CORS errors, check:
+- The CMS is reachable from the player
+- No intermediate proxy is stripping Electron's injected headers
 
 ### Service won't auto-start
 
