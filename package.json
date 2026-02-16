@@ -5,10 +5,10 @@
   "main": "src/main.js",
   "author": "Pau Aliagas <linuxnow@gmail.com>",
   "license": "AGPL-3.0",
-  "homepage": "https://github.com/linuxnow/xiboplayer-electron",
+  "homepage": "https://github.com/xibo-players/xiboplayer-electron",
   "repository": {
     "type": "git",
-    "url": "https://github.com/linuxnow/xiboplayer-electron.git"
+    "url": "https://github.com/xibo-players/xiboplayer-electron.git"
   },
   "scripts": {
     "start": "electron .",
