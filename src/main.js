@@ -765,12 +765,25 @@ function setupIpcHandlers() {
   // Get system information for hardware key generation
   ipcMain.handle('get-system-info', () => {
     const os = require('os');
+    // Get MAC address of first non-internal interface with a real MAC
+    let macAddress = 'n/a';
+    const nets = os.networkInterfaces();
+    for (const iface of Object.values(nets)) {
+      for (const cfg of iface) {
+        if (!cfg.internal && cfg.mac && cfg.mac !== '00:00:00:00:00:00') {
+          macAddress = cfg.mac;
+          break;
+        }
+      }
+      if (macAddress !== 'n/a') break;
+    }
     return {
       platform: process.platform,
       arch: process.arch,
       cpus: os.cpus().length,
       hostname: os.hostname(),
       totalMemory: os.totalmem(),
+      macAddress,
       electronVersion: process.versions.electron,
       chromeVersion: process.versions.chrome,
     };
