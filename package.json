@@ -1,26 +1,21 @@
 {
   "name": "@xiboplayer/electron-pwa",
-  "version": "0.9.0",
+  "version": "0.1.0",
   "description": "Xibo Player - Electron Kiosk Wrapper for PWA",
   "main": "src/main.js",
   "author": "TecMan <pau@tecman.cat>",
   "license": "AGPL-3.0",
-  "homepage": "https://github.com/tecman/xibo_players",
+  "homepage": "https://github.com/linuxnow/xibo_players",
   "repository": {
     "type": "git",
-    "url": "https://github.com/tecman/xibo_players.git"
+    "url": "https://github.com/linuxnow/xibo_players.git"
   },
   "scripts": {
     "start": "electron .",
     "dev": "electron . --dev",
     "build:pwa": "cd ../pwa && pnpm run build",
     "build": "pnpm run build:pwa && electron-builder",
-    "build:linux": "pnpm run build:pwa && electron-builder --linux",
-    "build:rpm": "pnpm run build:pwa && electron-builder --linux rpm",
-    "build:deb": "pnpm run build:pwa && electron-builder --linux deb",
-    "build:appimage": "pnpm run build:pwa && electron-builder --linux AppImage",
-    "build:win": "pnpm run build:pwa && electron-builder --windows",
-    "build:all": "pnpm run build:pwa && electron-builder -mwl",
+    "build:linux": "pnpm run build:pwa && electron-builder --linux dir",
     "build:electron-only": "electron-builder",
     "postinstall": "electron-builder install-app-deps"
   },
@@ -35,9 +30,9 @@
     "electron-builder": "^26.7.0"
   },
   "build": {
-    "appId": "cat.tecman.xiboplayer",
-    "productName": "XiboPlayer",
-    "artifactName": "xibo-player-${version}-${arch}.${ext}",
+    "appId": "org.xiboplayer.pwa",
+    "productName": "xiboplayer",
+    "artifactName": "xiboplayer-${version}-${arch}.${ext}",
     "directories": {
       "output": "dist-packages",
       "buildResources": "resources"
@@ -56,52 +51,16 @@
     "linux": {
       "target": [
         {
-          "target": "rpm",
-          "arch": ["x64"]
-        },
-        {
-          "target": "deb",
-          "arch": ["x64"]
-        },
-        {
-          "target": "AppImage",
+          "target": "dir",
           "arch": ["x64"]
         }
       ],
       "category": "Utility",
       "icon": "resources/icon.png",
-      "executableName": "xibo-player",
-      "desktop": {
-        "Name": "Xibo Player",
-        "Comment": "Digital Signage Player",
-        "Type": "Application",
-        "Categories": "Utility;AudioVideo;"
-      }
+      "executableName": "xiboplayer"
     },
     "rpm": {
-      "depends": [],
-      "afterInstall": "resources/linux/after-install.sh",
-      "afterRemove": "resources/linux/after-remove.sh"
-    },
-    "deb": {
-      "depends": [],
-      "afterInstall": "resources/linux/after-install.sh",
-      "afterRemove": "resources/linux/after-remove.sh"
-    },
-    "win": {
-      "target": ["nsis"],
-      "icon": "resources/icon.ico"
-    },
-    "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true,
-      "createDesktopShortcut": true,
-      "createStartMenuShortcut": true
-    },
-    "mac": {
-      "target": ["dmg"],
-      "category": "public.app-category.utilities",
-      "icon": "resources/icon.icns"
+      "depends": []
     }
   }
 }
