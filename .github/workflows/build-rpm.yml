@@ -1,0 +1,80 @@
+name: Build Electron RPM
+
+on:
+  push:
+    branches: [deploy]
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Package version (e.g. 1.0.0)'
+        required: false
+        default: '1.0.0'
+
+jobs:
+  build:
+    name: Build Electron RPM
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+
+    steps:
+      - name: Install build tools
+        run: dnf install -y rpm-build rpmdevtools git nodejs npm
+
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build Electron app
+        run: pnpm run build
+
+      - name: Build RPM
+        run: |
+          if [[ -f rpm/build-rpm.sh ]]; then
+            chmod +x rpm/build-rpm.sh
+            ./rpm/build-rpm.sh "${{ inputs.version || '1.0.0' }}"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: electron-rpm
+          path: dist/*.rpm
+          retention-days: 30
+
+  publish-rpm:
+    name: Publish to gh-pages dnf repo
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: gh-pages
+        continue-on-error: true
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: electron-rpm
+          path: rpms/
+
+      - name: Setup dnf repo
+        run: |
+          mkdir -p gh-pages/rpm/packages
+          cp rpms/*.rpm gh-pages/rpm/packages/
+          docker run --rm -v "$PWD/gh-pages/rpm:/repo" fedora:latest \
+            bash -c "dnf install -y createrepo_c && createrepo_c /repo"
+
+      - uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: gh-pages
+          keep_files: true

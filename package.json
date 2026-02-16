@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Xibo Player - Electron Kiosk Wrapper for PWA",
   "main": "src/main.js",
-  "author": "TecMan <pau@tecman.cat>",
+  "author": "Pau Aliagas <linuxnow@gmail.com>",
   "license": "AGPL-3.0",
   "homepage": "https://github.com/linuxnow/xiboplayer-electron",
   "repository": {
