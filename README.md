@@ -408,10 +408,6 @@ rm -rf ~/.config/systemd/user/xibo-player.service
 rm -rf ~/.local/share/applications/xibo-player.desktop
 ```
 
-## License
-
-AGPL-3.0 - See LICENSE file for details.
-
 ## Support
 
 - **GitHub Issues:** https://github.com/tecman/xibo_players/issues
@@ -423,3 +419,7 @@ AGPL-3.0 - See LICENSE file for details.
 - **Xibo CMS:** https://xibosignage.com
 - **Electron:** https://www.electronjs.org/
 - **Express:** https://expressjs.com/
+
+## License
+
+AGPL-3.0-or-later

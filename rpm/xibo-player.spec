@@ -2,7 +2,7 @@
 %global _electron_dir /opt/XiboPlayer
 
 Name:           xibo-player
-Version:        0.9.0
+Version:        0.1.0
 Release:        1%{?dist}
 Summary:        Electron-based digital signage player for Xibo CMS
 
