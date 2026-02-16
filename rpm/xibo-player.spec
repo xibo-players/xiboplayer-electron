@@ -21,6 +21,10 @@ Requires:       libuuid
 Requires:       mesa-dri-drivers
 Requires:       mesa-libgbm
 Requires:       alsa-lib
+Requires:       libva
+Recommends:     libva-nvidia-driver
+Recommends:     libva-intel-media-driver
+Recommends:     libva-utils
 
 %description
 Xibo Player is an Electron-based digital signage player that provides
