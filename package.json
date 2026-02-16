@@ -1,25 +1,24 @@
 {
-  "name": "@xiboplayer/electron-pwa",
+  "name": "@xiboplayer/electron",
   "version": "0.1.0",
   "description": "Xibo Player - Electron Kiosk Wrapper for PWA",
   "main": "src/main.js",
   "author": "TecMan <pau@tecman.cat>",
   "license": "AGPL-3.0",
-  "homepage": "https://github.com/linuxnow/xibo_players",
+  "homepage": "https://github.com/linuxnow/xiboplayer-electron",
   "repository": {
     "type": "git",
-    "url": "https://github.com/linuxnow/xibo_players.git"
+    "url": "https://github.com/linuxnow/xiboplayer-electron.git"
   },
   "scripts": {
     "start": "electron .",
     "dev": "electron . --dev",
-    "build:pwa": "cd ../pwa && pnpm run build",
-    "build": "pnpm run build:pwa && electron-builder",
-    "build:linux": "pnpm run build:pwa && electron-builder --linux dir",
-    "build:electron-only": "electron-builder",
+    "build": "electron-builder",
+    "build:linux": "electron-builder --linux dir",
     "postinstall": "electron-builder install-app-deps"
   },
   "dependencies": {
+    "@xiboplayer/pwa": "^0.1.0",
     "electron-store": "^8.2.0",
     "express": "^5.2.1",
     "cors": "^2.8.6",
@@ -43,7 +42,7 @@
     ],
     "extraResources": [
       {
-        "from": "../pwa/dist",
+        "from": "node_modules/@xiboplayer/pwa/dist",
         "to": "pwa",
         "filter": ["**/*"]
       }
