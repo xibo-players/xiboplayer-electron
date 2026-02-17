@@ -16,3 +16,6 @@ jobs:
       build-command: 'pnpm run build:linux'
       deb-script: 'deb/build-deb.sh'
       deb-output-dir: dist-packages
+      arch-matrix: '["amd64", "arm64"]'
+      gpg-sign: true
+    secrets: inherit
