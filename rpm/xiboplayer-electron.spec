@@ -9,7 +9,7 @@ License:        AGPL-3.0-or-later
 URL:            https://github.com/linuxnow/xibo_players
 Source0:        xiboplayer-electron-%{version}-linux-unpacked.tar.gz
 
-ExclusiveArch:  x86_64
+ExclusiveArch:  x86_64 aarch64
 BuildRequires:  systemd-rpm-macros
 
 Requires:       gtk3
