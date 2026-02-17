@@ -1,0 +1,20 @@
+name: Build Electron RPM
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    uses: xibo-players/.github/.github/workflows/build-rpm.yml@main
+    with:
+      package-name: xiboplayer-electron
+      build-command: 'pnpm run build:linux'
+      rpm-script: 'rpm/build-rpm.sh'
+      rpm-output-dir: dist-packages
+      publish-to-repo: true
+      create-github-release: true
