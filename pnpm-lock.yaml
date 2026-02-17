@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@xiboplayer/pwa':
-        specifier: ^0.1.0
-        version: 0.1.0
+        specifier: ^0.2.0
+        version: 0.2.0
       cors:
         specifier: ^2.8.6
         version: 2.8.6
@@ -226,40 +226,40 @@ packages:
   '@types/yauzl@2.10.3':
     resolution: {integrity: sha512-oJoftv0LSuaDZE3Le4DbKX+KS9G36NzOeSap90UIK0yMA/NhKJhqlSGtNDORNRaIbQfzjXDrQa0ytJ6mNRGz/Q==}
 
-  '@xiboplayer/cache@0.1.0':
-    resolution: {integrity: sha512-4uIzIpaHZrwEuUkZW33XRPXItj1MOsEPpSG5/Ir32+Yz70DLOpDXC51fh0z03pnCXCII3oYjaSWnklP25wGzaA==}
+  '@xiboplayer/cache@0.2.0':
+    resolution: {integrity: sha512-b2+gl9cLsRM4PVQcQ74Jssmlm2F/kKz5rsEJB0U84Z41Jnkmctb/FY5dDUm07VAqKf+m7m0FGNVzTPWjqcTT5Q==}
 
-  '@xiboplayer/core@0.1.0':
-    resolution: {integrity: sha512-FQhjXZBjaol6cyKKI5u/mSK1/o3yat3mY4yLLN5+8HxFht468EybLGT5pKfK3fRqR8v6LYtuSbEsIKmLxmQUCw==}
+  '@xiboplayer/core@0.2.0':
+    resolution: {integrity: sha512-RDLN3vPYR0sJj1WztzGJ5+/xTGMBoSRSjBhKzzMxePDPUygUcprTnXzto42Ta8Aj91l/RuGWpqcqoTfIRpTyDw==}
     peerDependencies:
-      '@xiboplayer/cache': 0.1.0
-      '@xiboplayer/renderer': 0.1.0
-      '@xiboplayer/schedule': 0.1.0
-      '@xiboplayer/xmds': 0.1.0
+      '@xiboplayer/cache': 0.2.0
+      '@xiboplayer/renderer': 0.2.0
+      '@xiboplayer/schedule': 0.2.0
+      '@xiboplayer/xmds': 0.2.0
 
-  '@xiboplayer/pwa@0.1.0':
-    resolution: {integrity: sha512-jQOtvaKSBfNLqBNYPGUHbyhHQZd1AaKyNolAB2E7UqnpT+atHINnDLrHljdGw9sRGQZ64az4TS+n8fwbaMxkXw==}
+  '@xiboplayer/pwa@0.2.0':
+    resolution: {integrity: sha512-18Of3F1E68auuiH/JKtf5Qjpf84JfsQk7huJMlFS9YNh5BFshah/EvPSknPPgHj3uk9wkL5g1p3o2+i/B6K4+Q==}
 
-  '@xiboplayer/renderer@0.1.0':
-    resolution: {integrity: sha512-iWlhOeAB6Vdz1HJZdyM3sZAUV5rMEB5mfEjV5XwwgYgnDNt2wbrqV1xwm/k/Om4xPJTsoEpQlDalYHCakbEBRA==}
+  '@xiboplayer/renderer@0.2.0':
+    resolution: {integrity: sha512-08IO1dQdCCDwjb6sFY0XsqXxdH8+M44Kr3nLrfK4bcosuP+BL1ZPVA4/2Whcwn818PEhFbkTac7QRnDrE0jfYw==}
 
-  '@xiboplayer/schedule@0.1.0':
-    resolution: {integrity: sha512-DJc9IlbA0f8qIdRLtUdsWNbsd1JcXMy+TZY0NMNX+HEBZYdiSv+OYpjFiyAFZ4b5VzGQ7IV4g97/ONAg5a5HdA==}
+  '@xiboplayer/schedule@0.2.0':
+    resolution: {integrity: sha512-4MtkgfIyfizQtUpoYwzqh6RL8nPHqcYrH9oyTU81UlwIa2Bc02hc1w0LpP3f/uZZA2vhZh6fp/eYQ8rRlvJpAQ==}
 
-  '@xiboplayer/settings@0.1.0':
-    resolution: {integrity: sha512-s75/bTYg68cQPT2rRR/V0WyC28FpkozORujL8B0CRuj3LPxAyxwlHy3wYPWLjjWJlnF2XH8mS7WES5UDIm6CKw==}
+  '@xiboplayer/settings@0.2.0':
+    resolution: {integrity: sha512-5LPxtwKwf+HTuGXnxKHgKj4MWrpArVa+gYQcBvdS4HqeoNaeQlk10S0/p4UB1WTIgFRkF4LZk8CLRBWgMuk5Fw==}
 
-  '@xiboplayer/stats@0.1.0':
-    resolution: {integrity: sha512-w+oN9pWhI3+WITNewwLrY8SnKyHAkO/+lTHT1Y76iRgStw5XqEHTxRXu0oPxhIvz69iKrH0nB4Cqp3FgQfOv3w==}
+  '@xiboplayer/stats@0.2.0':
+    resolution: {integrity: sha512-r3EHTU+UtTmkpzeg8BRMb1/RlN/g7IK71w2aMfwW2gT2Baa7SkTyJ+F/TeeYTvwinXAwcAIm5yoU2ey1Ehxaxg==}
 
-  '@xiboplayer/utils@0.1.0':
-    resolution: {integrity: sha512-r4jTDaWcb+8BFjar/Oj8qv2J7bNuEuTv+p8pVnBCwUFwSAA2Nkm/ocPg4de3OnhsFdkFVVl5ZxRjf9gx+0yn2A==}
+  '@xiboplayer/utils@0.2.0':
+    resolution: {integrity: sha512-5eG86eB9+ySykFDT321SihLWEA9XdY/HywH1BvC6fqn6WJ0qPFf6n+8+rwAesSTLutmi8XiDm3tP4tEgM2GzQQ==}
 
-  '@xiboplayer/xmds@0.1.0':
-    resolution: {integrity: sha512-OAGdljQBBdaWYhDD7RySGqA5J+y0ITSrF9YsiOVzCchNqqczn8Vk8DH7mbkkQrIW2BJygIhrE3SqmlSxfWNCCA==}
+  '@xiboplayer/xmds@0.2.0':
+    resolution: {integrity: sha512-Z2YfccHnMXzwo9UdKdK3ujDIpUjnKHOtRgr9AV1DPiQ0UCyYtOjA1KMETqdKcNDJWWLeEVHwf792hTsZkAb2bQ==}
 
-  '@xiboplayer/xmr@0.1.0':
-    resolution: {integrity: sha512-/xEnQMp0mVzEGATl6NWck2/2y9Wnfumrx0fmkHXDvaBMANq6Gg3CGLy11R87eU/eS/DFS42mdoZGqjtzkfVD5w==}
+  '@xiboplayer/xmr@0.2.0':
+    resolution: {integrity: sha512-H4lNveuoTFXVvFYxiZWPf/fbsGC0RqhIh78smaS2GDhm5RyRxZaJ05vZ7saKKjYyNBazs75pljIM60BY3DhQ7A==}
 
   '@xibosignage/xibo-communication-framework@0.0.6':
     resolution: {integrity: sha512-4qRHIfUFZXWK3ZTG+t9w3cwtaULppi/V+pnyX1KWLT07v1dxUJuS8IcZTeAQa0OZ1AlkPIwFtcYZJpo21T/40Q==}
@@ -1953,63 +1953,63 @@ snapshots:
       '@types/node': 24.10.13
     optional: true
 
-  '@xiboplayer/cache@0.1.0':
+  '@xiboplayer/cache@0.2.0':
     dependencies:
-      '@xiboplayer/utils': 0.1.0
+      '@xiboplayer/utils': 0.2.0
       spark-md5: 3.0.2
 
-  '@xiboplayer/core@0.1.0(@xiboplayer/cache@0.1.0)(@xiboplayer/renderer@0.1.0)(@xiboplayer/schedule@0.1.0)(@xiboplayer/xmds@0.1.0)':
+  '@xiboplayer/core@0.2.0(@xiboplayer/cache@0.2.0)(@xiboplayer/renderer@0.2.0)(@xiboplayer/schedule@0.2.0)(@xiboplayer/xmds@0.2.0)':
     dependencies:
-      '@xiboplayer/cache': 0.1.0
-      '@xiboplayer/renderer': 0.1.0
-      '@xiboplayer/schedule': 0.1.0
-      '@xiboplayer/utils': 0.1.0
-      '@xiboplayer/xmds': 0.1.0
+      '@xiboplayer/cache': 0.2.0
+      '@xiboplayer/renderer': 0.2.0
+      '@xiboplayer/schedule': 0.2.0
+      '@xiboplayer/utils': 0.2.0
+      '@xiboplayer/xmds': 0.2.0
       '@xibosignage/xibo-communication-framework': 0.0.6
       nanoevents: 9.1.0
 
-  '@xiboplayer/pwa@0.1.0':
+  '@xiboplayer/pwa@0.2.0':
     dependencies:
-      '@xiboplayer/cache': 0.1.0
-      '@xiboplayer/core': 0.1.0(@xiboplayer/cache@0.1.0)(@xiboplayer/renderer@0.1.0)(@xiboplayer/schedule@0.1.0)(@xiboplayer/xmds@0.1.0)
-      '@xiboplayer/renderer': 0.1.0
-      '@xiboplayer/schedule': 0.1.0
-      '@xiboplayer/settings': 0.1.0
-      '@xiboplayer/stats': 0.1.0
-      '@xiboplayer/utils': 0.1.0
-      '@xiboplayer/xmds': 0.1.0
-      '@xiboplayer/xmr': 0.1.0
+      '@xiboplayer/cache': 0.2.0
+      '@xiboplayer/core': 0.2.0(@xiboplayer/cache@0.2.0)(@xiboplayer/renderer@0.2.0)(@xiboplayer/schedule@0.2.0)(@xiboplayer/xmds@0.2.0)
+      '@xiboplayer/renderer': 0.2.0
+      '@xiboplayer/schedule': 0.2.0
+      '@xiboplayer/settings': 0.2.0
+      '@xiboplayer/stats': 0.2.0
+      '@xiboplayer/utils': 0.2.0
+      '@xiboplayer/xmds': 0.2.0
+      '@xiboplayer/xmr': 0.2.0
       html2canvas: 1.4.1
       nanoevents: 9.1.0
       xml2js: 0.6.2
 
-  '@xiboplayer/renderer@0.1.0':
+  '@xiboplayer/renderer@0.2.0':
     dependencies:
-      '@xiboplayer/utils': 0.1.0
+      '@xiboplayer/utils': 0.2.0
       nanoevents: 9.1.0
       pdfjs-dist: 4.10.38
 
-  '@xiboplayer/schedule@0.1.0':
+  '@xiboplayer/schedule@0.2.0':
     dependencies:
-      '@xiboplayer/utils': 0.1.0
+      '@xiboplayer/utils': 0.2.0
 
-  '@xiboplayer/settings@0.1.0':
+  '@xiboplayer/settings@0.2.0':
     dependencies:
-      '@xiboplayer/utils': 0.1.0
+      '@xiboplayer/utils': 0.2.0
 
-  '@xiboplayer/stats@0.1.0':
+  '@xiboplayer/stats@0.2.0':
     dependencies:
-      '@xiboplayer/utils': 0.1.0
+      '@xiboplayer/utils': 0.2.0
 
-  '@xiboplayer/utils@0.1.0': {}
+  '@xiboplayer/utils@0.2.0': {}
 
-  '@xiboplayer/xmds@0.1.0':
+  '@xiboplayer/xmds@0.2.0':
     dependencies:
-      '@xiboplayer/utils': 0.1.0
+      '@xiboplayer/utils': 0.2.0
 
-  '@xiboplayer/xmr@0.1.0':
+  '@xiboplayer/xmr@0.2.0':
     dependencies:
-      '@xiboplayer/utils': 0.1.0
+      '@xiboplayer/utils': 0.2.0
       '@xibosignage/xibo-communication-framework': 0.0.6
 
   '@xibosignage/xibo-communication-framework@0.0.6': {}
