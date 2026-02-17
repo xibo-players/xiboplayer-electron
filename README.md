@@ -33,27 +33,14 @@ Production-ready Electron kiosk application that wraps the Xibo PWA player for e
 ### From RPM (Fedora/RHEL)
 
 ```bash
-sudo rpm -i xibo-player-1.0.0-x86_64.rpm
-```
-
-### From DEB (Debian/Ubuntu)
-
-```bash
-sudo dpkg -i xibo-player-1.0.0-amd64.deb
-```
-
-### From AppImage (Universal Linux)
-
-```bash
-chmod +x xibo-player-1.0.0-x86_64.AppImage
-./xibo-player-1.0.0-x86_64.AppImage
+sudo dnf install xiboplayer-electron-*.rpm
 ```
 
 ## Configuration
 
 ### Configuration File
 
-Location: `~/.config/xibo-player/config.json`
+Location: `~/.config/@xiboplayer/electron-pwa/config.json`
 
 ```json
 {
@@ -74,13 +61,13 @@ Location: `~/.config/xibo-player/config.json`
 
 ```bash
 # Development mode (enables DevTools)
-xibo-player --dev
+xiboplayer-electron --dev
 
 # Custom port
-xibo-player --port=8080
+xiboplayer-electron --port=8080
 
 # Disable kiosk mode
-xibo-player --no-kiosk
+xiboplayer-electron --no-kiosk
 ```
 
 ### Environment Variables
@@ -102,7 +89,7 @@ export NODE_ENV=development
 
 ```bash
 # Run from command line
-xibo-player
+xiboplayer-electron
 
 # Or launch from applications menu
 # Applications → AudioVideo → Xibo Player
@@ -112,24 +99,24 @@ xibo-player
 
 **Enable:**
 ```bash
-systemctl --user enable xibo-player.service
-systemctl --user start xibo-player.service
+systemctl --user enable xiboplayer-electron.service
+systemctl --user start xiboplayer-electron.service
 ```
 
 **Disable:**
 ```bash
-systemctl --user stop xibo-player.service
-systemctl --user disable xibo-player.service
+systemctl --user stop xiboplayer-electron.service
+systemctl --user disable xiboplayer-electron.service
 ```
 
 **Check status:**
 ```bash
-systemctl --user status xibo-player.service
+systemctl --user status xiboplayer-electron.service
 ```
 
 **View logs:**
 ```bash
-journalctl --user -u xibo-player.service -f
+journalctl --user -u xiboplayer-electron.service -f
 ```
 
 ### Keyboard Shortcuts
@@ -150,63 +137,20 @@ Right-click the system tray icon (or press Ctrl+Shift+F12) to access:
 
 ## Building from Source
 
-### Prerequisites
-
 ```bash
-cd platforms/electron-pwa
 npm install
+npm run make
 ```
 
-### Build PWA First
-
-The Electron wrapper serves the PWA, so build it first:
-
-```bash
-cd ../pwa
-npm run build
-```
-
-### Build Packages
-
-```bash
-cd ../electron-pwa
-
-# Build all Linux packages
-npm run build:linux
-
-# Or build specific formats
-npm run build:rpm      # Fedora/RHEL
-npm run build:deb      # Debian/Ubuntu
-npm run build:appimage # Universal Linux
-
-# Windows
-npm run build:win
-
-# All platforms
-npm run build:all
-```
-
-Packages are created in `dist-packages/`:
-
-```
-dist-packages/
-├── xibo-player-1.0.0-x86_64.rpm
-├── xibo-player-1.0.0-amd64.deb
-└── xibo-player-1.0.0-x86_64.AppImage
-```
+This builds the RPM via electron-forge into `out/make/rpm/x86_64/`.
+For production builds, use the external RPM spec instead.
 
 ## Development
 
 ### Run in Development Mode
 
 ```bash
-# Terminal 1: Start PWA dev server
-cd platforms/pwa
-npm run dev
-
-# Terminal 2: Start Electron
-cd platforms/electron-pwa
-npm run dev
+npx electron . --dev --no-kiosk
 ```
 
 This enables:
@@ -220,7 +164,7 @@ This enables:
 Set environment variable for verbose logging:
 
 ```bash
-DEBUG=* xibo-player
+DEBUG=* xiboplayer-electron
 ```
 
 ## Architecture
@@ -237,7 +181,7 @@ The main process handles:
 ### Renderer Process
 
 The renderer is the PWA player loaded from `http://localhost:8765`:
-- Uses the existing PWA built with Vite
+- Uses the PWA built from `@xiboplayer/*` packages (installed via npm)
 - Full access to PWA features (cache, offline, etc.)
 - Communicates with main via IPC when needed
 
@@ -261,23 +205,10 @@ Built-in HTTP server:
 ### RPM Package
 
 - **Install location:** `/opt/Xibo Player/`
-- **Binary location:** `/usr/bin/xibo-player` (symlink)
-- **Config location:** `~/.config/xibo-player/`
-- **Systemd service:** `~/.config/systemd/user/xibo-player.service`
-- **Desktop entry:** `~/.local/share/applications/xibo-player.desktop`
-
-### DEB Package
-
-Same structure as RPM, compatible with:
-- Debian 10+
-- Ubuntu 20.04+
-- Linux Mint 20+
-
-### AppImage
-
-- **Self-contained** - No installation required
-- **Portable** - Run from any location
-- **Compatible** - Works on most Linux distributions
+- **Binary location:** `/usr/bin/xiboplayer-electron` (symlink)
+- **Config location:** `~/.config/@xiboplayer/electron-pwa/`
+- **Systemd service:** `~/.config/systemd/user/xiboplayer-electron.service`
+- **Desktop entry:** `~/.local/share/applications/xiboplayer-electron.desktop`
 
 ## Security
 
@@ -330,27 +261,23 @@ The app requests minimal permissions:
 
 ```bash
 # Check if port is available
-sudo netstat -tulpn | grep 8765
+ss -tlnp | grep 8765
 
 # Try different port
-xibo-player --port=8080
+xiboplayer-electron --port=8080
 
 # Check logs
-journalctl --user -u xibo-player.service -n 50
+journalctl --user -u xiboplayer-electron.service -n 50
 ```
 
 ### Black screen
 
 ```bash
 # Check PWA files exist
-ls -la ~/.local/share/xibo-player/pwa/
-
-# Rebuild PWA
-cd platforms/pwa
-npm run build
+ls -la ~/.local/share/@xiboplayer/electron-pwa/pwa/
 
 # Reinstall package
-sudo rpm -i --force xibo-player-*.rpm
+sudo dnf reinstall xiboplayer-electron-*.rpm
 ```
 
 ### CORS errors
@@ -368,10 +295,10 @@ If you still see CORS errors, check:
 loginctl enable-linger $USER
 
 # Check service status
-systemctl --user status xibo-player.service
+systemctl --user status xiboplayer-electron.service
 
 # View full logs
-journalctl --user -u xibo-player.service --no-pager
+journalctl --user -u xiboplayer-electron.service --no-pager
 ```
 
 ### Can't exit kiosk mode
@@ -380,45 +307,34 @@ Press **Ctrl+Shift+F12** to show system tray menu, then select "Exit Player".
 
 Or from terminal:
 ```bash
-pkill -f xibo-player
+pkill -f xiboplayer-electron
 ```
 
 ## Uninstallation
 
 ### RPM
 ```bash
-sudo rpm -e xibo-player
+sudo dnf remove xiboplayer-electron
 ```
-
-### DEB
-```bash
-sudo dpkg -r xibo-player
-```
-
-### AppImage
-Just delete the `.AppImage` file.
 
 ### Remove Configuration
 
 Configuration files are preserved during uninstallation. To remove manually:
 
 ```bash
-rm -rf ~/.config/xibo-player
-rm -rf ~/.config/systemd/user/xibo-player.service
-rm -rf ~/.local/share/applications/xibo-player.desktop
+rm -rf ~/.config/@xiboplayer/electron-pwa
+rm -rf ~/.config/systemd/user/xiboplayer-electron.service
+rm -rf ~/.local/share/applications/xiboplayer-electron.desktop
 ```
 
 ## Support
 
-- **GitHub Issues:** https://github.com/tecman/xibo_players/issues
-- **Documentation:** https://xibo.org.uk/docs/
-- **Community Forum:** https://community.xibo.org.uk/
+- **GitHub Issues:** https://github.com/xibo-players/xiboplayer-electron/issues
 
 ## Credits
 
 - **Xibo CMS:** https://xibosignage.com
 - **Electron:** https://www.electronjs.org/
-- **Express:** https://expressjs.com/
 
 ## License
 
