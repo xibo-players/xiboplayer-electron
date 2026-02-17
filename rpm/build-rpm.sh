@@ -13,7 +13,11 @@ echo "==> Building $NAME RPM v$VERSION"
 case "$(uname -m)" in
     x86_64)  ELECTRON_ARCH="x64" ;;
     aarch64) ELECTRON_ARCH="arm64" ;;
-    *)       ELECTRON_ARCH="" ;;
+    *)       
+        echo "ERROR: Unsupported architecture: $(uname -m)"
+        echo "       Only x86_64 and aarch64 are supported"
+        exit 1
+        ;;
 esac
 
 # Detect the electron-builder output directory
@@ -21,7 +25,7 @@ esac
 # For other architectures: linux-{arch}-unpacked
 if [ -d "$ELECTRON_DIR/dist-packages/linux-unpacked" ]; then
     LINUX_UNPACKED="linux-unpacked"
-elif [ -n "$ELECTRON_ARCH" ] && [ -d "$ELECTRON_DIR/dist-packages/linux-${ELECTRON_ARCH}-unpacked" ]; then
+elif [ -d "$ELECTRON_DIR/dist-packages/linux-${ELECTRON_ARCH}-unpacked" ]; then
     LINUX_UNPACKED="linux-${ELECTRON_ARCH}-unpacked"
 else
     echo "ERROR: Build artifacts not found!"
