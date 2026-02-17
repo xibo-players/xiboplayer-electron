@@ -14,6 +14,7 @@ jobs:
     with:
       package-name: xiboplayer-electron
       build-command: 'pnpm run build:linux'
+      rpm-spec: 'rpm/xiboplayer-electron.spec'
       rpm-script: 'rpm/build-rpm.sh'
       rpm-output-dir: dist-packages
       arch-matrix: '["x86_64"]'
