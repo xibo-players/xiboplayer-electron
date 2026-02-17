@@ -15,36 +15,92 @@ jobs:
   build:
     name: Build Electron RPM
     runs-on: ubuntu-latest
-    container:
-      image: fedora:latest
 
     steps:
-      - name: Install build tools
-        run: dnf install -y rpm-build rpmdevtools git nodejs npm
-
       - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
 
       - name: Install pnpm
         run: npm install -g pnpm
 
+      - name: Determine version
+        id: version
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "version=${{ github.event.inputs.version }}" >> "$GITHUB_OUTPUT"
+          elif [[ "${{ github.ref_type }}" == "tag" ]]; then
+            TAG="${{ github.ref_name }}"
+            echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=0.1.0" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build PWA from source
+        run: |
+          git clone --depth 1 https://github.com/xibo-players/xiboplayer-pwa.git /tmp/pwa
+          cd /tmp/pwa
+          pnpm install
+          pnpm run build
+          mkdir -p $GITHUB_WORKSPACE/node_modules/@xiboplayer/pwa/dist
+          cp -r dist/* $GITHUB_WORKSPACE/node_modules/@xiboplayer/pwa/dist/
+
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --ignore-scripts
 
       - name: Build Electron app
-        run: pnpm run build
+        run: pnpm run build:linux
 
       - name: Build RPM
         run: |
+          sudo dnf install -y rpm-build rpmdevtools 2>/dev/null || sudo apt-get install -y rpm 2>/dev/null || true
           if [[ -f rpm/build-rpm.sh ]]; then
             chmod +x rpm/build-rpm.sh
-            ./rpm/build-rpm.sh "${{ inputs.version || '1.0.0' }}"
+            ./rpm/build-rpm.sh "${{ steps.version.outputs.version }}"
           fi
 
       - uses: actions/upload-artifact@v4
         with:
           name: electron-rpm
-          path: dist/*.rpm
+          path: |
+            dist-packages/*.rpm
+            dist-packages/linux-unpacked/
           retention-days: 30
+
+  release:
+    name: Create GitHub Release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: electron-rpm
+          path: dist/
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          name: "Electron Player ${{ github.ref_name }}"
+          body: |
+            ## Xibo Electron Player RPM
+
+            ### Installation
+            ```bash
+            sudo dnf install ./xiboplayer-electron-*.x86_64.rpm
+            ```
+
+            ### Post-install
+            ```bash
+            systemctl --user enable --now xiboplayer.service
+            ```
+          files: dist/*.rpm
+          draft: false
+          prerelease: false
 
   publish-rpm:
     name: Publish to gh-pages dnf repo
@@ -69,7 +125,7 @@ jobs:
       - name: Setup dnf repo
         run: |
           mkdir -p gh-pages/rpm/packages
-          cp rpms/*.rpm gh-pages/rpm/packages/
+          cp rpms/*.rpm gh-pages/rpm/packages/ 2>/dev/null || true
           docker run --rm -v "$PWD/gh-pages/rpm:/repo" fedora:latest \
             bash -c "dnf install -y createrepo_c && createrepo_c /repo"
 
