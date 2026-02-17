@@ -12,7 +12,7 @@ echo "==> Building $NAME RPM v$VERSION"
 # Check if linux-unpacked exists
 if [ ! -d "$ELECTRON_DIR/dist-packages/linux-unpacked" ]; then
     echo "ERROR: dist-packages/linux-unpacked/ not found!"
-    echo "       Run 'pnpm run build:linux' in platforms/electron-pwa first"
+    echo "       Run 'pnpm run build:linux' first"
     exit 1
 fi
 
