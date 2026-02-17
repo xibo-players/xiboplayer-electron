@@ -81,12 +81,12 @@ const cliDisplayName = displayNameArg ? displayNameArg.split('=').slice(1).join(
 
 /**
  * Get the path to PWA dist files.
- * - Dev mode: uses ../pwa/dist (relative to electron-pwa source)
+ * - Dev mode: uses ../xiboplayer-pwa/dist (sibling repo)
  * - Production: uses resources/pwa (bundled by electron-builder extraResources)
  */
 function getPwaPath() {
   if (isDev) {
-    return path.join(__dirname, '../../pwa/dist');
+    return path.join(__dirname, '../../xiboplayer-pwa/dist');
   }
   return path.join(process.resourcesPath, 'pwa');
 }
@@ -148,7 +148,7 @@ function createExpressServer() {
 
       const response = await fetch(xmdsUrl, {
         method: req.method,
-        headers: headers,
+        headers,
         body: req.method !== 'GET' && req.body ? req.body : undefined,
       });
 
@@ -198,10 +198,7 @@ function createExpressServer() {
       if (req.headers['accept']) headers['Accept'] = req.headers['accept'];
       if (req.headers['if-none-match']) headers['If-None-Match'] = req.headers['if-none-match'];
 
-      const fetchOptions = {
-        method: req.method,
-        headers,
-      };
+      const fetchOptions = { method: req.method, headers };
 
       if (req.method !== 'GET' && req.method !== 'HEAD' && req.body) {
         fetchOptions.body = typeof req.body === 'string' ? req.body : JSON.stringify(req.body);
@@ -332,9 +329,9 @@ function createWindow() {
   console.log(`[Window] Creating window (kiosk: ${kioskMode}, fullscreen: ${fullscreen}, dev: ${isDev})`);
 
   mainWindow = new BrowserWindow({
-    width: width,
-    height: height,
-    fullscreen: fullscreen,
+    width,
+    height,
+    fullscreen,
     kiosk: kioskMode,
     frame: !kioskMode,
     autoHideMenuBar: true,

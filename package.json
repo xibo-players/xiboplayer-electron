@@ -1,9 +1,10 @@
 {
   "name": "@xiboplayer/electron",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "description": "Xibo Player - Electron Kiosk Wrapper for PWA",
   "main": "src/main.js",
   "author": "Pau Aliagas <linuxnow@gmail.com>",
+  "packageManager": "pnpm@10.7.0",
   "license": "AGPL-3.0",
   "homepage": "https://github.com/xibo-players/xiboplayer-electron",
   "repository": {
@@ -18,7 +19,7 @@
     "postinstall": "electron-builder install-app-deps"
   },
   "dependencies": {
-    "@xiboplayer/pwa": "^0.1.3",
+    "@xiboplayer/pwa": "^0.2.0",
     "electron-store": "^8.2.0",
     "express": "^5.2.1",
     "cors": "^2.8.6",
