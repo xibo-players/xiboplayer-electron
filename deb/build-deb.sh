@@ -75,7 +75,7 @@ Description=Xibo Player - Digital Signage (Electron)
 After=graphical-session.target
 Wants=graphical-session.target
 PartOf=graphical-session.target
-Documentation=https://github.com/linuxnow/xibo_players
+Documentation=https://github.com/xibo-players/xiboplayer-electron
 
 [Service]
 Type=simple

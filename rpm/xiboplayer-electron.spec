@@ -6,7 +6,7 @@ Release:        1%{?dist}
 Summary:        Xibo digital signage player (Electron)
 
 License:        AGPL-3.0-or-later
-URL:            https://github.com/linuxnow/xibo_players
+URL:            https://github.com/xibo-players/xiboplayer-electron
 Source0:        xiboplayer-electron-%{version}-linux-unpacked.tar.gz
 
 ExclusiveArch:  x86_64 aarch64
@@ -73,7 +73,7 @@ Description=Xibo Player - Digital Signage (Electron)
 After=graphical-session.target
 Wants=graphical-session.target
 PartOf=graphical-session.target
-Documentation=https://github.com/linuxnow/xibo_players
+Documentation=https://github.com/xibo-players/xiboplayer-electron
 
 [Service]
 Type=simple
