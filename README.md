@@ -23,7 +23,7 @@ Production-ready Electron kiosk application that wraps the Xibo PWA player for e
 
 ### Local HTTP Server
 - **Serves PWA files** - Built-in Express server on localhost:8765
-- **CORS enabled** - Proper headers for CMS communication
+- **CORS handling** - Strips and re-injects CORS headers to avoid double-header issues with reverse proxies
 - **Zero configuration** - Works out of the box
 
 ### Logging
@@ -205,7 +205,6 @@ Security bridge between main and renderer:
 Built-in HTTP server:
 - Serves PWA files from `resources/pwa/`
 - Runs on localhost:8765 (configurable)
-- CORS enabled for XMDS communication
 - SPA routing support
 
 ## Security
@@ -239,12 +238,6 @@ Verify with `vainfo`:
 sudo dnf install libva-utils
 vainfo
 ```
-
-### CORS Configuration
-
-Electron strips any existing CORS headers from server responses and replaces them
-with its own `Access-Control-Allow-Origin: *`. This prevents double-header issues
-when reverse proxies (e.g. SWAG/nginx) also add CORS headers.
 
 ### Permissions
 
@@ -280,11 +273,7 @@ sudo dnf reinstall xiboplayer-electron-*.rpm
 
 ### CORS errors
 
-Electron automatically strips existing CORS headers from server responses and replaces them with its own `Access-Control-Allow-Origin: *`. This prevents double-header issues when reverse proxies (e.g. SWAG/nginx) also add CORS headers.
-
-If you still see CORS errors, check:
-- The CMS is reachable from the player
-- No intermediate proxy is stripping Electron's injected headers
+Electron strips existing CORS headers from CMS responses and injects its own `Access-Control-Allow-Origin: *`, so double-header issues with reverse proxies (e.g. SWAG/nginx) are handled automatically. If you still see CORS errors, check that the CMS is reachable from the player.
 
 ### Service won't auto-start
 
