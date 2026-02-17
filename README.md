@@ -17,10 +17,18 @@ Production-ready Electron kiosk application that wraps the Xibo PWA player for e
 - **System tray control** - Hidden menu accessible via Ctrl+Shift+F12
 - **Service management** - Easy enable/disable via systemd
 
+### CMS Communication
+- **REST API first** - Uses the Xibo CMS REST API as the primary protocol
+- **XMDS SOAP fallback** - Falls back to XMDS SOAP when REST is unavailable
+
 ### Local HTTP Server
 - **Serves PWA files** - Built-in Express server on localhost:8765
-- **CORS enabled** - Proper headers for XMDS communication
+- **CORS enabled** - Proper headers for CMS communication
 - **Zero configuration** - Works out of the box
+
+### Logging
+- **Configurable log levels** - `error`, `warn`, `info`, `debug`, `trace`
+- **Ideal for deployments** - Use `debug` during initial setup to verify CMS connectivity, schedule parsing, and media downloads, then switch to `warn` or `error` for production
 
 ### Configuration
 - **Persistent storage** - electron-store for configuration
