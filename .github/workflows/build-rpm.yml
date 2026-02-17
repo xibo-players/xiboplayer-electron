@@ -9,7 +9,7 @@ on:
       version:
         description: 'Package version (e.g. 1.0.0)'
         required: false
-        default: '1.0.0'
+        default: '0.1.0'
 
 jobs:
   build:
@@ -38,24 +38,15 @@ jobs:
             echo "version=0.1.0" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Build PWA from source
-        run: |
-          git clone --depth 1 https://github.com/xibo-players/xiboplayer-pwa.git /tmp/pwa
-          cd /tmp/pwa
-          pnpm install
-          pnpm run build
-          mkdir -p $GITHUB_WORKSPACE/node_modules/@xiboplayer/pwa/dist
-          cp -r dist/* $GITHUB_WORKSPACE/node_modules/@xiboplayer/pwa/dist/
-
       - name: Install dependencies
-        run: pnpm install --ignore-scripts
+        run: pnpm install
 
       - name: Build Electron app
         run: pnpm run build:linux
 
       - name: Build RPM
         run: |
-          sudo dnf install -y rpm-build rpmdevtools 2>/dev/null || sudo apt-get install -y rpm 2>/dev/null || true
+          sudo apt-get install -y rpm
           if [[ -f rpm/build-rpm.sh ]]; then
             chmod +x rpm/build-rpm.sh
             ./rpm/build-rpm.sh "${{ steps.version.outputs.version }}"
@@ -66,7 +57,6 @@ jobs:
           name: electron-rpm
           path: |
             dist-packages/*.rpm
-            dist-packages/linux-unpacked/
           retention-days: 30
 
   release:
