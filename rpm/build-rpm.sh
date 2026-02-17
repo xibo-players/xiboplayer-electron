@@ -13,7 +13,7 @@ echo "==> Building $NAME RPM v$VERSION"
 case "$(uname -m)" in
     x86_64)  ELECTRON_ARCH="x64" ;;
     aarch64) ELECTRON_ARCH="arm64" ;;
-    *)       
+    *)
         echo "ERROR: Unsupported architecture: $(uname -m)"
         echo "       Only x86_64 and aarch64 are supported"
         exit 1
