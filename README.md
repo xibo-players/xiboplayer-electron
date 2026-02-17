@@ -68,28 +68,25 @@ Location: `~/.config/@xiboplayer/electron-pwa/config.json`
 ### Command-Line Arguments
 
 ```bash
-# Development mode (enables DevTools)
-xiboplayer-electron --dev
-
-# Custom port
-xiboplayer-electron --port=8080
-
-# Disable kiosk mode
-xiboplayer-electron --no-kiosk
+xiboplayer-electron --dev              # Development mode (enables DevTools)
+xiboplayer-electron --no-kiosk         # Disable kiosk mode
+xiboplayer-electron --port=8080        # Custom Express server port
+xiboplayer-electron --cms-url=URL      # Override CMS URL
+xiboplayer-electron --cms-key=KEY      # Override hardware key
+xiboplayer-electron --display-name=NAME  # Override display name
 ```
 
-### Environment Variables
+### Log Levels
 
-```bash
-# Override CMS URL
-export XIBO_CMS_URL="https://cms.example.com"
+Set via URL parameter `?logLevel=DEBUG` or from CMS display settings:
 
-# Override hardware key
-export XIBO_HARDWARE_KEY="your-key"
-
-# Run in development mode
-export NODE_ENV=development
-```
+| Level | Use case |
+|-------|----------|
+| `DEBUG` | Initial deployment — verify CMS connectivity, schedule parsing, media downloads |
+| `INFO` | Normal operation (default) |
+| `WARNING` | Production — only unexpected conditions |
+| `ERROR` | Production — only failures |
+| `NONE` | Silent |
 
 ## Usage
 
