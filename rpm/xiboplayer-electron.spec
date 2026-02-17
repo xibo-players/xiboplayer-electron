@@ -1,7 +1,7 @@
 %global debug_package %{nil}
 
 Name:           xiboplayer-electron
-Version:        0.1.0
+Version:        %{_version}
 Release:        1%{?dist}
 Summary:        Xibo digital signage player (Electron)
 
