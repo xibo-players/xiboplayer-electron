@@ -9,19 +9,28 @@ NAME="xiboplayer-electron"
 
 # Detect architecture
 case "$(uname -m)" in
-    x86_64)  ARCH="amd64" ;;
-    aarch64) ARCH="arm64" ;;
+    x86_64)  ARCH="amd64"; ELECTRON_ARCH="x64" ;;
+    aarch64) ARCH="arm64"; ELECTRON_ARCH="arm64" ;;
     *)       echo "ERROR: Unsupported architecture: $(uname -m)"; exit 1 ;;
 esac
 
 echo "==> Building $NAME DEB v$VERSION for $ARCH"
 
-# Check if linux-unpacked exists
-if [ ! -d "$ELECTRON_DIR/dist-packages/linux-unpacked" ]; then
-    echo "ERROR: dist-packages/linux-unpacked/ not found!"
+# Detect the electron-builder output directory
+# For x64: linux-unpacked
+# For other architectures: linux-{arch}-unpacked
+if [ -d "$ELECTRON_DIR/dist-packages/linux-unpacked" ]; then
+    LINUX_UNPACKED="linux-unpacked"
+elif [ -d "$ELECTRON_DIR/dist-packages/linux-${ELECTRON_ARCH}-unpacked" ]; then
+    LINUX_UNPACKED="linux-${ELECTRON_ARCH}-unpacked"
+else
+    echo "ERROR: Build artifacts not found!"
+    echo "       Expected: dist-packages/linux-unpacked/ or dist-packages/linux-${ELECTRON_ARCH}-unpacked/"
     echo "       Run 'pnpm run build:linux' first"
     exit 1
 fi
+
+echo "==> Using build artifacts from: $LINUX_UNPACKED"
 
 # Create DEB package directory structure
 DEB_DIR="$ELECTRON_DIR/deb-pkg/$NAME"
@@ -36,7 +45,7 @@ mkdir -p "$DEB_DIR/usr/lib/systemd/user"
 echo "==> Installing files..."
 
 # Copy Electron app bundle
-cp -a "$ELECTRON_DIR/dist-packages/linux-unpacked/"* "$DEB_DIR/usr/lib/xiboplayer/"
+cp -a "$ELECTRON_DIR/dist-packages/$LINUX_UNPACKED/"* "$DEB_DIR/usr/lib/xiboplayer/"
 
 # Create wrapper script
 cat > "$DEB_DIR/usr/bin/xiboplayer" << 'WRAPPER'

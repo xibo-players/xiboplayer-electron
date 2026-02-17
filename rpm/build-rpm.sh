@@ -9,12 +9,28 @@ NAME="xiboplayer-electron"
 
 echo "==> Building $NAME RPM v$VERSION"
 
-# Check if linux-unpacked exists
-if [ ! -d "$ELECTRON_DIR/dist-packages/linux-unpacked" ]; then
-    echo "ERROR: dist-packages/linux-unpacked/ not found!"
+# Detect architecture for electron-builder output directory
+case "$(uname -m)" in
+    x86_64)  ELECTRON_ARCH="x64" ;;
+    aarch64) ELECTRON_ARCH="arm64" ;;
+    *)       ELECTRON_ARCH="" ;;
+esac
+
+# Detect the electron-builder output directory
+# For x64: linux-unpacked
+# For other architectures: linux-{arch}-unpacked
+if [ -d "$ELECTRON_DIR/dist-packages/linux-unpacked" ]; then
+    LINUX_UNPACKED="linux-unpacked"
+elif [ -n "$ELECTRON_ARCH" ] && [ -d "$ELECTRON_DIR/dist-packages/linux-${ELECTRON_ARCH}-unpacked" ]; then
+    LINUX_UNPACKED="linux-${ELECTRON_ARCH}-unpacked"
+else
+    echo "ERROR: Build artifacts not found!"
+    echo "       Expected: dist-packages/linux-unpacked/ or dist-packages/linux-${ELECTRON_ARCH}-unpacked/"
     echo "       Run 'pnpm run build:linux' first"
     exit 1
 fi
+
+echo "==> Using build artifacts from: $LINUX_UNPACKED"
 
 # Create RPM build tree
 mkdir -p ~/rpmbuild/{SOURCES,SPECS,BUILD,RPMS,SRPMS}
@@ -22,7 +38,13 @@ mkdir -p ~/rpmbuild/{SOURCES,SPECS,BUILD,RPMS,SRPMS}
 # Create source tarball (rpmbuild expects to unpack to linux-unpacked/)
 echo "==> Creating source tarball..."
 TARBALL="$HOME/rpmbuild/SOURCES/$NAME-$VERSION-linux-unpacked.tar.gz"
-tar czf "$TARBALL" -C "$ELECTRON_DIR/dist-packages" linux-unpacked
+# Create tarball with the directory renamed to linux-unpacked if needed
+if [ "$LINUX_UNPACKED" = "linux-unpacked" ]; then
+    tar czf "$TARBALL" -C "$ELECTRON_DIR/dist-packages" linux-unpacked
+else
+    # For architecture-specific names, rename to linux-unpacked in the tarball
+    tar czf "$TARBALL" -C "$ELECTRON_DIR/dist-packages" --transform="s|$LINUX_UNPACKED|linux-unpacked|" "$LINUX_UNPACKED"
+fi
 echo "    $TARBALL ($(du -h "$TARBALL" | cut -f1))"
 
 # Copy spec and build
