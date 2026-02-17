@@ -32,7 +32,8 @@ rpmbuild -bb ~/rpmbuild/SPECS/xiboplayer-electron.spec \
     --define "_version $VERSION"
 
 # Show result
-RPM_FILE=$(ls -1t ~/rpmbuild/RPMS/x86_64/$NAME-$VERSION-*.rpm 2>/dev/null | head -1)
+ARCH=$(uname -m)
+RPM_FILE=$(ls -1t ~/rpmbuild/RPMS/$ARCH/$NAME-$VERSION-*.rpm 2>/dev/null | head -1)
 if [ -n "$RPM_FILE" ]; then
     cp "$RPM_FILE" "$ELECTRON_DIR/dist-packages/"
     echo ""
