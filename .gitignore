@@ -6,6 +6,7 @@ package-lock.json
 dist/
 dist-packages/
 out/
+deb-pkg/
 
 # Logs
 *.log
