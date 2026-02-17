@@ -1,0 +1,18 @@
+name: Build Electron DEB
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    uses: xibo-players/.github/.github/workflows/build-deb.yml@main
+    with:
+      package-name: xiboplayer-electron
+      build-command: 'pnpm run build:linux'
+      deb-script: 'deb/build-deb.sh'
+      deb-output-dir: dist-packages
