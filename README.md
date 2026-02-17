@@ -208,16 +208,6 @@ Built-in HTTP server:
 - CORS enabled for XMDS communication
 - SPA routing support
 
-## Packaging Details
-
-### RPM Package
-
-- **Install location:** `/opt/Xibo Player/`
-- **Binary location:** `/usr/bin/xiboplayer-electron` (symlink)
-- **Config location:** `~/.config/@xiboplayer/electron-pwa/`
-- **Systemd service:** `~/.config/systemd/user/xiboplayer-electron.service`
-- **Desktop entry:** `~/.local/share/applications/xiboplayer-electron.desktop`
-
 ## Security
 
 ### Sandboxing
