@@ -1,16 +1,26 @@
 %global debug_package %{nil}
 
+# Electron bundles Chromium which links legacy compat stubs (libc.so,
+# libdl.so.2, libpthread.so.0, librt.so.1).  On Fedora 38+ these are
+# all merged into glibc / libc.so.6.  Filter them so dnf doesn't pull
+# in glibc-devel or fail to resolve.
+# Also filter the bundled libffmpeg.so (shipped inside the Electron tree).
+%global __requires_exclude ^(libc\\.so\\(\\)|libdl\\.so\\.2|libpthread\\.so\\.0|librt\\.so\\.1|libffmpeg\\.so)
+
 Name:           xiboplayer-electron
-Version:        0.1.0
+Version:        %{_version}
 Release:        1%{?dist}
 Summary:        Xibo digital signage player (Electron)
 
 License:        AGPL-3.0-or-later
-URL:            https://github.com/linuxnow/xibo_players
-Source0:        xiboplayer-electron-%{version}-linux-unpacked.tar.gz
+URL:            https://github.com/xibo-players/%{name}
+Source0:        %{name}-%{version}-linux-unpacked.tar.gz
 
-ExclusiveArch:  x86_64
+ExclusiveArch:  x86_64 aarch64
 BuildRequires:  systemd-rpm-macros
+
+# Bundled components — Fedora Packaging Guidelines §Bundling
+Provides:       bundled(electron) = 40
 
 Requires:       gtk3
 Requires:       nss
@@ -22,7 +32,7 @@ Requires:       xdg-utils
 Recommends:     libva
 Recommends:     mesa-dri-drivers
 
-Conflicts:      xiboplayer-pwa
+Conflicts:      xiboplayer-chromium
 
 %description
 Xibo Player wrapped in Electron for desktop and kiosk digital signage.
@@ -33,7 +43,7 @@ system tray integration, and automatic launch via systemd.
 %setup -q -n linux-unpacked
 
 %build
-# Pre-built Electron binary, nothing to build
+# Pre-built Electron binary — nothing to compile
 
 %install
 # Electron app bundle
@@ -43,7 +53,6 @@ cp -a * %{buildroot}%{_libdir}/xiboplayer/
 # Wrapper script
 install -Dm755 /dev/stdin %{buildroot}%{_bindir}/xiboplayer << 'WRAPPER'
 #!/bin/bash
-# Xibo Player (Electron) — launcher
 exec %{_libdir}/xiboplayer/xiboplayer "$@"
 WRAPPER
 
@@ -73,7 +82,7 @@ Description=Xibo Player - Digital Signage (Electron)
 After=graphical-session.target
 Wants=graphical-session.target
 PartOf=graphical-session.target
-Documentation=https://github.com/linuxnow/xibo_players
+Documentation=https://github.com/xibo-players/xiboplayer-electron
 
 [Service]
 Type=simple
@@ -109,7 +118,12 @@ if [ $1 -eq 0 ] ; then
 fi
 
 %changelog
-* Mon Feb 16 2026 Pau Aliagas <linuxnow@gmail.com> - 0.9.0-1
-- New RPM spec with proper Fedora FHS paths
+* Tue Feb 18 2026 Pau Aliagas <linuxnow@gmail.com> - 0.2.0-1
+- Filter bogus libc.so/libdl/libpthread/librt auto-requires
+- Add Provides: bundled(electron) per Fedora Bundling guidelines
+- Conflict with xiboplayer-chromium (not xiboplayer-pwa)
+
+* Mon Feb 16 2026 Pau Aliagas <linuxnow@gmail.com> - 0.1.0-1
+- Initial RPM with Fedora FHS paths
 - Electron bundle in /usr/lib64/xiboplayer/
 - Systemd user service for auto-start

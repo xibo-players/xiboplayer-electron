@@ -17,10 +17,18 @@ Production-ready Electron kiosk application that wraps the Xibo PWA player for e
 - **System tray control** - Hidden menu accessible via Ctrl+Shift+F12
 - **Service management** - Easy enable/disable via systemd
 
+### CMS Communication
+- **REST API first** - Uses the Xibo CMS REST API as the primary protocol
+- **XMDS SOAP fallback** - Falls back to XMDS SOAP when REST is unavailable
+
 ### Local HTTP Server
 - **Serves PWA files** - Built-in Express server on localhost:8765
-- **CORS enabled** - Proper headers for XMDS communication
+- **CORS handling** - Strips and re-injects CORS headers to avoid double-header issues with reverse proxies
 - **Zero configuration** - Works out of the box
+
+### Logging
+- **Configurable log levels** - `error`, `warn`, `info`, `debug`, `trace`
+- **Ideal for deployments** - Use `debug` during initial setup to verify CMS connectivity, schedule parsing, and media downloads, then switch to `warn` or `error` for production
 
 ### Configuration
 - **Persistent storage** - electron-store for configuration
@@ -33,27 +41,14 @@ Production-ready Electron kiosk application that wraps the Xibo PWA player for e
 ### From RPM (Fedora/RHEL)
 
 ```bash
-sudo rpm -i xibo-player-1.0.0-x86_64.rpm
-```
-
-### From DEB (Debian/Ubuntu)
-
-```bash
-sudo dpkg -i xibo-player-1.0.0-amd64.deb
-```
-
-### From AppImage (Universal Linux)
-
-```bash
-chmod +x xibo-player-1.0.0-x86_64.AppImage
-./xibo-player-1.0.0-x86_64.AppImage
+sudo dnf install xiboplayer-electron-*.rpm
 ```
 
 ## Configuration
 
 ### Configuration File
 
-Location: `~/.config/xibo-player/config.json`
+Location: `~/.config/@xiboplayer/electron-pwa/config.json`
 
 ```json
 {
@@ -73,28 +68,25 @@ Location: `~/.config/xibo-player/config.json`
 ### Command-Line Arguments
 
 ```bash
-# Development mode (enables DevTools)
-xibo-player --dev
-
-# Custom port
-xibo-player --port=8080
-
-# Disable kiosk mode
-xibo-player --no-kiosk
+xiboplayer-electron --dev              # Development mode (enables DevTools)
+xiboplayer-electron --no-kiosk         # Disable kiosk mode
+xiboplayer-electron --port=8080        # Custom Express server port
+xiboplayer-electron --cms-url=URL      # Override CMS URL
+xiboplayer-electron --cms-key=KEY      # Override hardware key
+xiboplayer-electron --display-name=NAME  # Override display name
 ```
 
-### Environment Variables
+### Log Levels
 
-```bash
-# Override CMS URL
-export XIBO_CMS_URL="https://cms.example.com"
+Set via URL parameter `?logLevel=DEBUG` or from CMS display settings:
 
-# Override hardware key
-export XIBO_HARDWARE_KEY="your-key"
-
-# Run in development mode
-export NODE_ENV=development
-```
+| Level | Use case |
+|-------|----------|
+| `DEBUG` | Initial deployment — verify CMS connectivity, schedule parsing, media downloads |
+| `INFO` | Normal operation (default) |
+| `WARNING` | Production — only unexpected conditions |
+| `ERROR` | Production — only failures |
+| `NONE` | Silent |
 
 ## Usage
 
@@ -102,7 +94,7 @@ export NODE_ENV=development
 
 ```bash
 # Run from command line
-xibo-player
+xiboplayer-electron
 
 # Or launch from applications menu
 # Applications → AudioVideo → Xibo Player
@@ -112,24 +104,24 @@ xibo-player
 
 **Enable:**
 ```bash
-systemctl --user enable xibo-player.service
-systemctl --user start xibo-player.service
+systemctl --user enable xiboplayer-electron.service
+systemctl --user start xiboplayer-electron.service
 ```
 
 **Disable:**
 ```bash
-systemctl --user stop xibo-player.service
-systemctl --user disable xibo-player.service
+systemctl --user stop xiboplayer-electron.service
+systemctl --user disable xiboplayer-electron.service
 ```
 
 **Check status:**
 ```bash
-systemctl --user status xibo-player.service
+systemctl --user status xiboplayer-electron.service
 ```
 
 **View logs:**
 ```bash
-journalctl --user -u xibo-player.service -f
+journalctl --user -u xiboplayer-electron.service -f
 ```
 
 ### Keyboard Shortcuts
@@ -150,63 +142,20 @@ Right-click the system tray icon (or press Ctrl+Shift+F12) to access:
 
 ## Building from Source
 
-### Prerequisites
-
 ```bash
-cd platforms/electron-pwa
 npm install
+npm run make
 ```
 
-### Build PWA First
-
-The Electron wrapper serves the PWA, so build it first:
-
-```bash
-cd ../pwa
-npm run build
-```
-
-### Build Packages
-
-```bash
-cd ../electron-pwa
-
-# Build all Linux packages
-npm run build:linux
-
-# Or build specific formats
-npm run build:rpm      # Fedora/RHEL
-npm run build:deb      # Debian/Ubuntu
-npm run build:appimage # Universal Linux
-
-# Windows
-npm run build:win
-
-# All platforms
-npm run build:all
-```
-
-Packages are created in `dist-packages/`:
-
-```
-dist-packages/
-├── xibo-player-1.0.0-x86_64.rpm
-├── xibo-player-1.0.0-amd64.deb
-└── xibo-player-1.0.0-x86_64.AppImage
-```
+This builds the RPM via electron-forge into `out/make/rpm/x86_64/`.
+For production builds, use the external RPM spec instead.
 
 ## Development
 
 ### Run in Development Mode
 
 ```bash
-# Terminal 1: Start PWA dev server
-cd platforms/pwa
-npm run dev
-
-# Terminal 2: Start Electron
-cd platforms/electron-pwa
-npm run dev
+npx electron . --dev --no-kiosk
 ```
 
 This enables:
@@ -220,7 +169,7 @@ This enables:
 Set environment variable for verbose logging:
 
 ```bash
-DEBUG=* xibo-player
+DEBUG=* xiboplayer-electron
 ```
 
 ## Architecture
@@ -237,7 +186,7 @@ The main process handles:
 ### Renderer Process
 
 The renderer is the PWA player loaded from `http://localhost:8765`:
-- Uses the existing PWA built with Vite
+- Uses the PWA built from `@xiboplayer/*` packages (installed via npm)
 - Full access to PWA features (cache, offline, etc.)
 - Communicates with main via IPC when needed
 
@@ -253,31 +202,7 @@ Security bridge between main and renderer:
 Built-in HTTP server:
 - Serves PWA files from `resources/pwa/`
 - Runs on localhost:8765 (configurable)
-- CORS enabled for XMDS communication
 - SPA routing support
-
-## Packaging Details
-
-### RPM Package
-
-- **Install location:** `/opt/Xibo Player/`
-- **Binary location:** `/usr/bin/xibo-player` (symlink)
-- **Config location:** `~/.config/xibo-player/`
-- **Systemd service:** `~/.config/systemd/user/xibo-player.service`
-- **Desktop entry:** `~/.local/share/applications/xibo-player.desktop`
-
-### DEB Package
-
-Same structure as RPM, compatible with:
-- Debian 10+
-- Ubuntu 20.04+
-- Linux Mint 20+
-
-### AppImage
-
-- **Self-contained** - No installation required
-- **Portable** - Run from any location
-- **Compatible** - Works on most Linux distributions
 
 ## Security
 
@@ -311,12 +236,6 @@ sudo dnf install libva-utils
 vainfo
 ```
 
-### CORS Configuration
-
-Electron strips any existing CORS headers from server responses and replaces them
-with its own `Access-Control-Allow-Origin: *`. This prevents double-header issues
-when reverse proxies (e.g. SWAG/nginx) also add CORS headers.
-
 ### Permissions
 
 The app requests minimal permissions:
@@ -330,36 +249,28 @@ The app requests minimal permissions:
 
 ```bash
 # Check if port is available
-sudo netstat -tulpn | grep 8765
+ss -tlnp | grep 8765
 
 # Try different port
-xibo-player --port=8080
+xiboplayer-electron --port=8080
 
 # Check logs
-journalctl --user -u xibo-player.service -n 50
+journalctl --user -u xiboplayer-electron.service -n 50
 ```
 
 ### Black screen
 
 ```bash
 # Check PWA files exist
-ls -la ~/.local/share/xibo-player/pwa/
-
-# Rebuild PWA
-cd platforms/pwa
-npm run build
+ls -la ~/.local/share/@xiboplayer/electron-pwa/pwa/
 
 # Reinstall package
-sudo rpm -i --force xibo-player-*.rpm
+sudo dnf reinstall xiboplayer-electron-*.rpm
 ```
 
 ### CORS errors
 
-Electron automatically strips existing CORS headers from server responses and replaces them with its own `Access-Control-Allow-Origin: *`. This prevents double-header issues when reverse proxies (e.g. SWAG/nginx) also add CORS headers.
-
-If you still see CORS errors, check:
-- The CMS is reachable from the player
-- No intermediate proxy is stripping Electron's injected headers
+Electron strips existing CORS headers from CMS responses and injects its own `Access-Control-Allow-Origin: *`, so double-header issues with reverse proxies (e.g. SWAG/nginx) are handled automatically. If you still see CORS errors, check that the CMS is reachable from the player.
 
 ### Service won't auto-start
 
@@ -368,10 +279,10 @@ If you still see CORS errors, check:
 loginctl enable-linger $USER
 
 # Check service status
-systemctl --user status xibo-player.service
+systemctl --user status xiboplayer-electron.service
 
 # View full logs
-journalctl --user -u xibo-player.service --no-pager
+journalctl --user -u xiboplayer-electron.service --no-pager
 ```
 
 ### Can't exit kiosk mode
@@ -380,45 +291,34 @@ Press **Ctrl+Shift+F12** to show system tray menu, then select "Exit Player".
 
 Or from terminal:
 ```bash
-pkill -f xibo-player
+pkill -f xiboplayer-electron
 ```
 
 ## Uninstallation
 
 ### RPM
 ```bash
-sudo rpm -e xibo-player
+sudo dnf remove xiboplayer-electron
 ```
-
-### DEB
-```bash
-sudo dpkg -r xibo-player
-```
-
-### AppImage
-Just delete the `.AppImage` file.
 
 ### Remove Configuration
 
 Configuration files are preserved during uninstallation. To remove manually:
 
 ```bash
-rm -rf ~/.config/xibo-player
-rm -rf ~/.config/systemd/user/xibo-player.service
-rm -rf ~/.local/share/applications/xibo-player.desktop
+rm -rf ~/.config/@xiboplayer/electron-pwa
+rm -rf ~/.config/systemd/user/xiboplayer-electron.service
+rm -rf ~/.local/share/applications/xiboplayer-electron.desktop
 ```
 
 ## Support
 
-- **GitHub Issues:** https://github.com/tecman/xibo_players/issues
-- **Documentation:** https://xibo.org.uk/docs/
-- **Community Forum:** https://community.xibo.org.uk/
+- **GitHub Issues:** https://github.com/xibo-players/xiboplayer-electron/issues
 
 ## Credits
 
 - **Xibo CMS:** https://xibosignage.com
 - **Electron:** https://www.electronjs.org/
-- **Express:** https://expressjs.com/
 
 ## License
 
