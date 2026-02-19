@@ -8,21 +8,18 @@ importers:
 
   .:
     dependencies:
+      '@xiboplayer/proxy':
+        specifier: ^0.2.0
+        version: 0.2.0
       '@xiboplayer/pwa':
         specifier: ^0.2.0
         version: 0.2.0
-      cors:
-        specifier: ^2.8.6
-        version: 2.8.6
       electron-auto-launch:
         specifier: ^5.0.7
         version: 5.0.7
       electron-store:
         specifier: ^8.2.0
         version: 8.2.0
-      express:
-        specifier: ^5.2.1
-        version: 5.2.1
     devDependencies:
       electron:
         specifier: ^40.4.1
@@ -236,6 +233,10 @@ packages:
       '@xiboplayer/renderer': 0.2.0
       '@xiboplayer/schedule': 0.2.0
       '@xiboplayer/xmds': 0.2.0
+
+  '@xiboplayer/proxy@0.2.0':
+    resolution: {integrity: sha512-RDR6pH+K8rMbLAllSvAfsJyzoBcjvdcbRNuAeEfpgfuwq23Hhx1HvHfQYVlxf66I10o+lXPTIWOjmtqlVu6l5Q==}
+    hasBin: true
 
   '@xiboplayer/pwa@0.2.0':
     resolution: {integrity: sha512-18Of3F1E68auuiH/JKtf5Qjpf84JfsQk7huJMlFS9YNh5BFshah/EvPSknPPgHj3uk9wkL5g1p3o2+i/B6K4+Q==}
@@ -1967,6 +1968,13 @@ snapshots:
       '@xiboplayer/xmds': 0.2.0
       '@xibosignage/xibo-communication-framework': 0.0.6
       nanoevents: 9.1.0
+
+  '@xiboplayer/proxy@0.2.0':
+    dependencies:
+      cors: 2.8.6
+      express: 5.2.1
+    transitivePeerDependencies:
+      - supports-color
 
   '@xiboplayer/pwa@0.2.0':
     dependencies:
