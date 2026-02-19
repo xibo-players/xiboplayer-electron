@@ -30,7 +30,7 @@ app.commandLine.appendSwitch('enable-features',
   'AcceleratedVideoEncoder,CanvasOopRasterization');
 
 // Version
-const APP_VERSION = '0.9.0';
+const APP_VERSION = '0.2.1';
 
 // Configuration
 const CONFIG_DEFAULTS = {
