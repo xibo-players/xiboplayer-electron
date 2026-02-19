@@ -12,7 +12,7 @@
  * - Session-level CORS headers for direct CMS requests from the renderer
  */
 
-const { app, BrowserWindow, ipcMain, powerSaveBlocker, globalShortcut, Menu, Tray, dialog, nativeImage } = require('electron');
+const { app, BrowserWindow, ipcMain, powerSaveBlocker, globalShortcut, Menu, Tray, dialog, nativeImage, desktopCapturer } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const Store = require('electron-store');
@@ -205,12 +205,35 @@ function createWindow() {
 
   console.log('[Session] CORS headers and preflight handling configured');
 
+  // ─── Forward Service Worker console logs to main process ────────────
+  // SW logs don't appear in webContents.on('console-message'). This
+  // captures them so they show up in /tmp/electron-pwa.log alongside
+  // renderer logs, making download/chunk debugging visible.
+  mainWindow.webContents.session.serviceWorkers.on('console-message', (_event, details) => {
+    const level = details.logLevel || 'info';
+    const prefix = level === 'error' ? '[SW ERROR]' : level === 'warning' ? '[SW WARN]' : '[SW]';
+    console.log(`${prefix} ${details.message}`);
+  });
+
+  // ─── Auto-approve screen capture (no permission dialog) ──────────────
+  // If the PWA calls getDisplayMedia() (e.g. before electronAPI is ready),
+  // auto-select the BrowserWindow as the capture source instead of showing
+  // Chrome's screen-sharing picker dialog.
+  mainWindow.webContents.session.setDisplayMediaRequestHandler(async (_request, callback) => {
+    const sources = await desktopCapturer.getSources({ types: ['window'] });
+    // Prefer our own window; fall back to first available source
+    const selfSource = sources.find(s => s.name === mainWindow.getTitle()) || sources[0];
+    callback({ video: selfSource, audio: 'loopback' });
+  });
+
   // Hide menu bar
   Menu.setApplicationMenu(null);
 
   // Load PWA from local server at /player/pwa/
+  // In dev mode, enable DEBUG logging via URL param (logger defaults to WARNING)
   const serverPort = cliPort || store.get('serverPort', CONFIG_DEFAULTS.serverPort);
-  const url = `http://localhost:${serverPort}/player/pwa/`;
+  const logParam = isDev ? '?logLevel=DEBUG' : '';
+  const url = `http://localhost:${serverPort}/player/pwa/${logParam}`;
 
   console.log(`[Window] Loading URL: ${url}`);
 

@@ -78,13 +78,15 @@ xiboplayer-electron --display-name=NAME  # Override display name
 
 ### Log Levels
 
-Set via URL parameter `?logLevel=DEBUG` or from CMS display settings:
+Default log level is **WARNING** (production-safe). The `--dev` flag automatically
+sets DEBUG logging. Override via URL parameter `?logLevel=DEBUG`, localStorage, or
+CMS display settings.
 
 | Level | Use case |
 |-------|----------|
-| `DEBUG` | Initial deployment — verify CMS connectivity, schedule parsing, media downloads |
-| `INFO` | Normal operation (default) |
-| `WARNING` | Production — only unexpected conditions |
+| `DEBUG` | Initial deployment — verify CMS connectivity, schedule parsing, media downloads (auto-set by `--dev`) |
+| `INFO` | Normal operation |
+| `WARNING` | Production default — only unexpected conditions |
 | `ERROR` | Production — only failures |
 | `NONE` | Silent |
 
@@ -159,7 +161,7 @@ npx electron . --dev --no-kiosk
 ```
 
 This enables:
-- Hot reload
+- DEBUG log level (via `?logLevel=DEBUG` URL param)
 - DevTools access (Ctrl+Shift+I)
 - Console logging
 - Error reporting
