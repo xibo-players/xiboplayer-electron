@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="screen" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1a2a3a" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#0d1520" stop-opacity="0.55"/>
+    </linearGradient>
+    <linearGradient id="gloss" x1="0.2" y1="0" x2="0.7" y2="1">
+      <stop offset="0%" stop-color="#fff" stop-opacity="0.12"/>
+      <stop offset="40%" stop-color="#fff" stop-opacity="0.02"/>
+      <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="bg" cx="0.5" cy="0.45" r="0.55">
+      <stop offset="0%" stop-color="#2a2e3a"/>
+      <stop offset="100%" stop-color="#12141a"/>
+    </radialGradient>
+    <radialGradient id="playglow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#5ab0ff" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#5ab0ff" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="b1" x="-5%" y="-10%" width="110%" height="120%">
+      <feTurbulence type="turbulence" baseFrequency="0.04 0.015" numOctaves="4" seed="3" result="t"/>
+      <feDisplacementMap in="SourceGraphic" in2="t" scale="14" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="b2" x="-5%" y="-10%" width="110%" height="120%">
+      <feTurbulence type="turbulence" baseFrequency="0.035 0.013" numOctaves="3" seed="11" result="t"/>
+      <feDisplacementMap in="SourceGraphic" in2="t" scale="16" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="b3" x="-5%" y="-10%" width="110%" height="120%">
+      <feTurbulence type="turbulence" baseFrequency="0.042 0.01" numOctaves="4" seed="17" result="t"/>
+      <feDisplacementMap in="SourceGraphic" in2="t" scale="13" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="b4" x="-5%" y="-10%" width="110%" height="120%">
+      <feTurbulence type="turbulence" baseFrequency="0.038 0.012" numOctaves="3" seed="23" result="t"/>
+      <feDisplacementMap in="SourceGraphic" in2="t" scale="15" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </defs>
+
+  <rect width="512" height="512" fill="#000"/>
+  <circle cx="256" cy="256" r="220" fill="url(#bg)"/>
+
+  <!-- 4 wide arched brush strokes -->
+  <g opacity="0.92">
+    <!-- Stripe 1 — strong arch down -->
+    <path d="M40,88 Q160,115 256,120 Q350,115 472,88 L472,132 Q350,158 256,163 Q160,158 40,132Z"
+          fill="#c41a1a" filter="url(#b1)"/>
+
+    <!-- Stripe 2 -->
+    <path d="M36,183 Q158,212 256,218 Q354,212 476,183 L476,228 Q354,257 256,263 Q158,257 36,228Z"
+          fill="#d02222" filter="url(#b2)"/>
+
+    <!-- Stripe 3 -->
+    <path d="M36,283 Q158,254 256,248 Q354,254 476,283 L476,328 Q354,299 256,293 Q158,299 36,328Z"
+          fill="#d02222" filter="url(#b3)"/>
+
+    <!-- Stripe 4 — strong arch up -->
+    <path d="M40,378 Q160,350 256,345 Q350,350 472,378 L472,422 Q350,394 256,389 Q160,394 40,422Z"
+          fill="#c41a1a" filter="url(#b4)"/>
+  </g>
+
+  <!-- Vertical totem/mupi — wider, Y-axis perspective -->
+  <!-- Stand pole -->
+  <polygon points="254,404 286,404 284,438 256,438" fill="#3a3e48" opacity="0.85"/>
+  <!-- Stand base -->
+  <polygon points="236,438 304,438 312,447 228,447" fill="#4a4e58" opacity="0.85"/>
+
+  <!-- Display frame — wider, Y perspective (left recedes, right closer) -->
+  <path d="M168,62 L340,48 Q356,47 357,63 L364,402 Q365,418 349,419 L161,406 Q145,405 144,389 L151,76 Q151,63 168,62Z"
+        fill="#20242c" fill-opacity="0.5" stroke="#4a5060" stroke-width="2.5"/>
+
+  <!-- Screen — inset -->
+  <path d="M178,74 L332,61 Q344,60 345,72 L351,394 Q352,406 340,407 L171,395 Q159,394 158,382 L164,86 Q164,75 178,74Z"
+        fill="url(#screen)"/>
+
+  <!-- Play glow -->
+  <circle cx="258" cy="236" r="68" fill="url(#playglow)"/>
+
+  <!-- Play triangle — angled to match display Y perspective (right side closer = right vertex wider) -->
+  <polygon points="230,196 228,280 302,240" fill="#e0e8f0" opacity="0.75"/>
+
+  <!-- Circle around play — slightly elliptical to match perspective -->
+  <ellipse cx="260" cy="238" rx="52" ry="54" fill="none" stroke="#e0e8f0" stroke-width="2.5" opacity="0.22"/>
+
+  <!-- Gloss -->
+  <path d="M178,74 L332,61 Q344,60 345,72 L351,394 Q352,406 340,407 L171,395 Q159,394 158,382 L164,86 Q164,75 178,74Z"
+        fill="url(#gloss)"/>
+</svg>
