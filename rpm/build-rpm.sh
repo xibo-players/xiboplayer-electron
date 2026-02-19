@@ -42,6 +42,8 @@ mkdir -p ~/rpmbuild/{SOURCES,SPECS,BUILD,RPMS,SRPMS}
 # Create source tarball (rpmbuild expects to unpack to linux-unpacked/)
 echo "==> Creating source tarball..."
 TARBALL="$HOME/rpmbuild/SOURCES/$NAME-$VERSION-linux-unpacked.tar.gz"
+# Copy icon into the build artifacts so it ends up in the tarball
+cp "$ELECTRON_DIR/resources/icon.png" "$ELECTRON_DIR/dist-packages/$LINUX_UNPACKED/icon.png"
 # Create tarball with the directory renamed to linux-unpacked if needed
 if [ "$LINUX_UNPACKED" = "linux-unpacked" ]; then
     tar czf "$TARBALL" -C "$ELECTRON_DIR/dist-packages" linux-unpacked
