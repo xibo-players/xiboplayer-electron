@@ -15,8 +15,6 @@
 const { app, BrowserWindow, ipcMain, powerSaveBlocker, globalShortcut, Menu, Tray, dialog, nativeImage } = require('electron');
 const path = require('path');
 const fs = require('fs');
-const express = require('express');
-const cors = require('cors');
 const Store = require('electron-store');
 const AutoLaunch = require('electron-auto-launch');
 
@@ -82,219 +80,29 @@ const cliDisplayName = displayNameArg ? displayNameArg.split('=').slice(1).join(
 /**
  * Get the path to PWA dist files.
  * - Dev mode: uses ../xiboplayer-pwa/dist (sibling repo)
- * - Production: uses resources/pwa (bundled by electron-builder extraResources)
+ * - Production: uses @xiboplayer/pwa/dist from node_modules (bundled by electron-builder)
  */
 function getPwaPath() {
   if (isDev) {
     return path.join(__dirname, '../../xiboplayer-pwa/dist');
   }
-  return path.join(process.resourcesPath, 'pwa');
+  // In production, resolve from node_modules inside the asar/unpacked app
+  return path.join(__dirname, '../node_modules/@xiboplayer/pwa/dist');
 }
 
 /**
- * Create and configure the Express server to serve PWA files
+ * Create and configure the Express server to serve PWA files.
+ * Uses @xiboplayer/proxy for CORS proxy routes and PWA static serving.
  */
-function createExpressServer() {
+async function createExpressServer() {
   const serverPort = cliPort || store.get('serverPort', CONFIG_DEFAULTS.serverPort);
   const pwaPath = getPwaPath();
 
   console.log(`[Express] PWA path: ${pwaPath}`);
   console.log(`[Express] Starting server on port: ${serverPort}`);
 
-  const expressApp = express();
-
-  // Enable CORS for all origins (needed for XMDS requests from renderer)
-  expressApp.use(cors({
-    origin: '*',
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'SOAPAction'],
-    credentials: true,
-  }));
-
-  // Parse various body types
-  expressApp.use(express.text({ type: 'text/xml', limit: '50mb' }));
-  expressApp.use(express.text({ type: 'application/xml', limit: '50mb' }));
-  expressApp.use(express.json({ limit: '10mb' }));
-  expressApp.use(express.urlencoded({ extended: true, limit: '10mb' }));
-
-  // ─── XMDS SOAP Proxy ──────────────────────────────────────────────
-  // Solves CORS issues by proxying SOAP/XML requests to the CMS.
-  // The PWA renderer sends requests to localhost:PORT/xmds-proxy?cms=URL
-  expressApp.all('/xmds-proxy', async (req, res) => {
-    try {
-      const cmsUrl = req.query.cms;
-      if (!cmsUrl) {
-        console.error('[Proxy] No CMS URL in request');
-        return res.status(400).json({ error: 'Missing cms parameter' });
-      }
-
-      // Construct XMDS URL with original query parameters (except cms)
-      const queryParams = new URLSearchParams(req.query);
-      queryParams.delete('cms');
-      const queryString = queryParams.toString();
-      const xmdsUrl = `${cmsUrl}/xmds.php${queryString ? '?' + queryString : ''}`;
-
-      console.log(`[Proxy] ${req.method} ${xmdsUrl}`);
-
-      const headers = {
-        'Content-Type': req.headers['content-type'] || 'text/xml; charset=utf-8',
-        'User-Agent': `Xibo Player Electron/${APP_VERSION}`,
-      };
-
-      // Copy SOAPAction header if present (required for SOAP)
-      if (req.headers['soapaction']) {
-        headers['SOAPAction'] = req.headers['soapaction'];
-      }
-
-      const response = await fetch(xmdsUrl, {
-        method: req.method,
-        headers,
-        body: req.method !== 'GET' && req.body ? req.body : undefined,
-      });
-
-      const contentType = response.headers.get('content-type');
-      if (contentType) {
-        res.setHeader('Content-Type', contentType);
-      }
-
-      res.setHeader('Access-Control-Allow-Origin', '*');
-      const responseText = await response.text();
-      res.status(response.status).send(responseText);
-
-      console.log(`[Proxy] ${response.status} (${responseText.length} bytes)`);
-    } catch (error) {
-      console.error('[Proxy] Error:', error.message);
-      res.status(500).json({ error: 'Proxy error', message: error.message });
-    }
-  });
-
-  // ─── REST API Proxy ────────────────────────────────────────────────
-  // Forwards REST API requests (used by RestClient transport).
-  // The PWA renderer sends requests to localhost:PORT/rest-proxy?cms=URL&path=/pwa/...
-  expressApp.all('/rest-proxy', async (req, res) => {
-    try {
-      const cmsUrl = req.query.cms;
-      const apiPath = req.query.path;
-      if (!cmsUrl) {
-        return res.status(400).json({ error: 'Missing cms parameter' });
-      }
-
-      // Build the full CMS REST URL
-      const queryParams = new URLSearchParams(req.query);
-      queryParams.delete('cms');
-      queryParams.delete('path');
-      const queryString = queryParams.toString();
-      const fullUrl = `${cmsUrl}${apiPath || ''}${queryString ? '?' + queryString : ''}`;
-
-      console.log(`[REST Proxy] ${req.method} ${fullUrl}`);
-
-      const headers = {
-        'User-Agent': `Xibo Player Electron/${APP_VERSION}`,
-      };
-
-      // Copy relevant headers
-      if (req.headers['content-type']) headers['Content-Type'] = req.headers['content-type'];
-      if (req.headers['authorization']) headers['Authorization'] = req.headers['authorization'];
-      if (req.headers['accept']) headers['Accept'] = req.headers['accept'];
-      if (req.headers['if-none-match']) headers['If-None-Match'] = req.headers['if-none-match'];
-
-      const fetchOptions = { method: req.method, headers };
-
-      if (req.method !== 'GET' && req.method !== 'HEAD' && req.body) {
-        fetchOptions.body = typeof req.body === 'string' ? req.body : JSON.stringify(req.body);
-      }
-
-      const response = await fetch(fullUrl, fetchOptions);
-
-      // Copy response headers (skip encoding headers — Node fetch already decompresses)
-      response.headers.forEach((value, key) => {
-        if (!['transfer-encoding', 'connection', 'content-encoding', 'content-length'].includes(key.toLowerCase())) {
-          res.setHeader(key, value);
-        }
-      });
-
-      res.setHeader('Access-Control-Allow-Origin', '*');
-      const buffer = await response.arrayBuffer();
-      res.status(response.status).send(Buffer.from(buffer));
-
-      console.log(`[REST Proxy] ${response.status} (${buffer.byteLength} bytes)`);
-    } catch (error) {
-      console.error('[REST Proxy] Error:', error.message);
-      res.status(500).json({ error: 'REST proxy error', message: error.message });
-    }
-  });
-
-  // ─── File Download Proxy ───────────────────────────────────────────
-  // Handles media and layout file downloads with Range request support.
-  // Used by the Service Worker to download files through the Electron proxy.
-  expressApp.get('/file-proxy', async (req, res) => {
-    try {
-      const cmsUrl = req.query.cms;
-      const fileUrl = req.query.url;
-
-      if (!cmsUrl || !fileUrl) {
-        return res.status(400).json({ error: 'Missing cms or url parameter' });
-      }
-
-      const fullUrl = `${cmsUrl}${fileUrl}`;
-      console.log(`[FileProxy] GET ${fullUrl}`);
-
-      const headers = {
-        'User-Agent': `Xibo Player Electron/${APP_VERSION}`,
-      };
-
-      // Support Range requests for chunked downloads
-      if (req.headers.range) {
-        headers['Range'] = req.headers.range;
-        console.log(`[FileProxy] Range: ${req.headers.range}`);
-      }
-
-      const response = await fetch(fullUrl, { headers });
-
-      // Copy response headers
-      res.status(response.status);
-      response.headers.forEach((value, key) => {
-        if (!['transfer-encoding', 'connection', 'content-encoding', 'content-length'].includes(key.toLowerCase())) {
-          res.setHeader(key, value);
-        }
-      });
-
-      res.setHeader('Access-Control-Allow-Origin', '*');
-
-      // Stream response body
-      const buffer = await response.arrayBuffer();
-      res.send(Buffer.from(buffer));
-
-      console.log(`[FileProxy] ${response.status} (${buffer.byteLength} bytes)`);
-    } catch (error) {
-      console.error('[FileProxy] Error:', error.message);
-      res.status(500).json({ error: 'File proxy error', message: error.message });
-    }
-  });
-
-  // ─── Serve PWA static files ────────────────────────────────────────
-  // Served at /player/pwa/ to match the path scheme expected by the PWA
-  // (Service Worker scope, cache URLs, etc.)
-  expressApp.use('/player/pwa', express.static(pwaPath, {
-    // Set proper MIME types and caching
-    setHeaders: (res, filePath) => {
-      // Service worker must not be cached by the browser
-      if (filePath.endsWith('sw-pwa.js')) {
-        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-        res.setHeader('Service-Worker-Allowed', '/player/pwa/');
-      }
-    },
-  }));
-
-  // Redirect root to /player/pwa/
-  expressApp.get('/', (req, res) => {
-    res.redirect('/player/pwa/');
-  });
-
-  // SPA fallback: sub-routes under /player/pwa/ serve index.html
-  expressApp.get('/player/pwa/{*splat}', (req, res) => {
-    res.sendFile(path.join(pwaPath, 'index.html'));
-  });
+  const { createProxyApp } = await import('@xiboplayer/proxy');
+  const expressApp = createProxyApp({ pwaPath, appVersion: APP_VERSION });
 
   // Start server
   expressServer = expressApp.listen(serverPort, 'localhost', () => {
@@ -836,7 +644,7 @@ app.whenReady().then(async () => {
   console.log(`[App] Electron: ${process.versions.electron}, Chrome: ${process.versions.chrome}`);
 
   // Create Express server to serve PWA files
-  createExpressServer();
+  await createExpressServer();
 
   // Create main window
   createWindow();

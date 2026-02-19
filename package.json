@@ -19,10 +19,9 @@
     "postinstall": "electron-builder install-app-deps"
   },
   "dependencies": {
+    "@xiboplayer/proxy": "^0.2.0",
     "@xiboplayer/pwa": "^0.2.0",
     "electron-store": "^8.2.0",
-    "express": "^5.2.1",
-    "cors": "^2.8.6",
     "electron-auto-launch": "^5.0.7"
   },
   "devDependencies": {
@@ -40,15 +39,6 @@
     "files": [
       "src/**/*",
       "package.json"
-    ],
-    "extraResources": [
-      {
-        "from": "node_modules/@xiboplayer/pwa/dist",
-        "to": "pwa",
-        "filter": [
-          "**/*"
-        ]
-      }
     ],
     "linux": {
       "target": [

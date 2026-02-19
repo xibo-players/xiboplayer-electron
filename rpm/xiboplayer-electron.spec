@@ -32,8 +32,6 @@ Requires:       xdg-utils
 Recommends:     libva
 Recommends:     mesa-dri-drivers
 
-Conflicts:      xiboplayer-chromium
-
 %description
 Xibo Player wrapped in Electron for desktop and kiosk digital signage.
 Provides a native application with built-in HTTP server, offline support,
@@ -47,36 +45,36 @@ system tray integration, and automatic launch via systemd.
 
 %install
 # Electron app bundle
-install -dm755 %{buildroot}%{_libdir}/xiboplayer
-cp -a * %{buildroot}%{_libdir}/xiboplayer/
+install -dm755 %{buildroot}%{_libdir}/%{name}
+cp -a * %{buildroot}%{_libdir}/%{name}/
 
 # Wrapper script
-install -Dm755 /dev/stdin %{buildroot}%{_bindir}/xiboplayer << 'WRAPPER'
+install -Dm755 /dev/stdin %{buildroot}%{_bindir}/%{name} << 'WRAPPER'
 #!/bin/bash
-exec %{_libdir}/xiboplayer/xiboplayer "$@"
+exec %{_libdir}/xiboplayer-electron/xiboplayer "$@"
 WRAPPER
 
 # Desktop entry
-install -Dm644 /dev/stdin %{buildroot}%{_datadir}/applications/xiboplayer.desktop << 'DESKTOP'
+install -Dm644 /dev/stdin %{buildroot}%{_datadir}/applications/%{name}.desktop << 'DESKTOP'
 [Desktop Entry]
-Name=Xibo Player
-Comment=Digital Signage Player for Xibo CMS
-Exec=xiboplayer
+Name=XiboPlayer Electron
+Comment=Digital Signage Player for Xibo CMS (Electron)
+Exec=xiboplayer-electron
 Icon=xiboplayer
 Terminal=false
 Type=Application
-Categories=AudioVideo;Player;
+Categories=Utility;
 Keywords=signage;digital;kiosk;xibo;
 StartupWMClass=xiboplayer
 DESKTOP
 
 # Icon
-install -Dm644 %{buildroot}%{_libdir}/xiboplayer/resources/app.asar.unpacked/resources/pwa/favicon.png \
+install -Dm644 %{buildroot}%{_libdir}/%{name}/resources/app.asar.unpacked/resources/pwa/favicon.png \
     %{buildroot}%{_datadir}/icons/hicolor/256x256/apps/xiboplayer.png 2>/dev/null || \
     echo "Icon not found in unpacked resources, skipping"
 
 # Systemd user service
-install -Dm644 /dev/stdin %{buildroot}%{_userunitdir}/xiboplayer.service << 'SERVICE'
+install -Dm644 /dev/stdin %{buildroot}%{_userunitdir}/%{name}.service << 'SERVICE'
 [Unit]
 Description=Xibo Player - Digital Signage (Electron)
 After=graphical-session.target
@@ -86,7 +84,7 @@ Documentation=https://github.com/xibo-players/xiboplayer-electron
 
 [Service]
 Type=simple
-ExecStart=%{_bindir}/xiboplayer --no-sandbox
+ExecStart=%{_bindir}/xiboplayer-electron --no-sandbox
 Restart=always
 RestartSec=10
 Environment=NODE_ENV=production
@@ -95,21 +93,29 @@ KillMode=mixed
 KillSignal=SIGTERM
 StandardOutput=journal
 StandardError=journal
-SyslogIdentifier=xiboplayer
+SyslogIdentifier=xiboplayer-electron
 
 [Install]
 WantedBy=graphical-session.target
 SERVICE
 
 %files
-%{_bindir}/xiboplayer
-%{_libdir}/xiboplayer/
-%{_datadir}/applications/xiboplayer.desktop
-%{_userunitdir}/xiboplayer.service
+%{_bindir}/%{name}
+%{_libdir}/%{name}/
+%{_datadir}/applications/%{name}.desktop
+%{_userunitdir}/%{name}.service
 
 %post
+# Register alternatives (higher priority than Chromium)
+alternatives --install %{_bindir}/xiboplayer xiboplayer %{_bindir}/%{name} 60
+
 touch --no-create %{_datadir}/icons/hicolor &>/dev/null || :
 gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
+
+%preun
+if [ "$1" -eq 0 ]; then
+    alternatives --remove xiboplayer %{_bindir}/%{name}
+fi
 
 %postun
 if [ $1 -eq 0 ] ; then
