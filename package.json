@@ -20,9 +20,9 @@
   },
   "dependencies": {
     "@xiboplayer/proxy": "^0.2.0",
-    "@xiboplayer/pwa": "^0.2.0",
-    "electron-store": "^8.2.0",
-    "electron-auto-launch": "^5.0.7"
+    "@xiboplayer/pwa": "^0.3.2",
+    "electron-auto-launch": "^5.0.7",
+    "electron-store": "^8.2.0"
   },
   "devDependencies": {
     "electron": "^40.4.1",

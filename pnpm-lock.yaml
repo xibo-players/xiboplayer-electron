@@ -12,8 +12,8 @@ importers:
         specifier: ^0.2.0
         version: 0.2.0
       '@xiboplayer/pwa':
-        specifier: ^0.2.0
-        version: 0.2.0
+        specifier: ^0.3.2
+        version: 0.3.2
       electron-auto-launch:
         specifier: ^5.0.7
         version: 5.0.7
@@ -97,74 +97,74 @@ packages:
     resolution: {integrity: sha512-9QOtNffcOF/c1seMCDnjckb3R9WHcG34tky+FHpNKKCW0wc/scYLwMtO+ptyGUfMW0/b/n4qRiALlaFHc9Oj7Q==}
     engines: {node: '>= 10.0.0'}
 
-  '@napi-rs/canvas-android-arm64@0.1.93':
-    resolution: {integrity: sha512-xRIoOPFvneR29Dtq5d9p2AJbijDCFeV4jQ+5Ms/xVAXJVb8R0Jlu+pPr/SkhrG+Mouaml4roPSXugTIeRl6CMA==}
+  '@napi-rs/canvas-android-arm64@0.1.94':
+    resolution: {integrity: sha512-YQ6K83RWNMQOtgpk1aIML97QTE3zxPmVCHTi5eA8Nss4+B9JZi5J7LHQr7B5oD7VwSfWd++xsPdUiJ1+frqsMg==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [android]
 
-  '@napi-rs/canvas-darwin-arm64@0.1.93':
-    resolution: {integrity: sha512-daNDi76HN5grC6GXDmpxdfP+N2mQPd3sCfg62VyHwUuvbZh32P7R/IUjkzAxtYMtTza+Zvx9hfLJ3J7ENL6WMA==}
+  '@napi-rs/canvas-darwin-arm64@0.1.94':
+    resolution: {integrity: sha512-h1yl9XjqSrYZAbBUHCVLAhwd2knM8D8xt081Pv40KqNJXfeMmBrhG1SfroRymG2ak+pl42iQlWjFZ2Z8AWFdSw==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [darwin]
 
-  '@napi-rs/canvas-darwin-x64@0.1.93':
-    resolution: {integrity: sha512-1YfuNPIQLawsg/gSNdJRk4kQWUy9M/Gy8FGsOI79nhQEJ2PZdqpSPl5UNzf4elfuNXuVbEbmmjP68EQdUunDuQ==}
+  '@napi-rs/canvas-darwin-x64@0.1.94':
+    resolution: {integrity: sha512-rkr/lrafbU0IIHebst+sQJf1HjdHvTMN0GGqWvw5OfaVS0K/sVxhNHtxi8oCfaRSvRE62aJZjWTcdc2ue/o6yw==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [darwin]
 
-  '@napi-rs/canvas-linux-arm-gnueabihf@0.1.93':
-    resolution: {integrity: sha512-8kEkOQPZjuyHjupvXExuJZiuiVNecdABGq3DLI7aO1EvQFOOlWMm2d/8Q5qXdV73Tn+nu3m16+kPajsN1oJefQ==}
+  '@napi-rs/canvas-linux-arm-gnueabihf@0.1.94':
+    resolution: {integrity: sha512-q95TDo32YkTKdi+Sp2yQ2Npm7pmfKEruNoJ3RUIw1KvQQ9EHKL3fii/iuU60tnzP0W+c8BKN7BFstNFcm2KXCQ==}
     engines: {node: '>= 10'}
     cpu: [arm]
     os: [linux]
 
-  '@napi-rs/canvas-linux-arm64-gnu@0.1.93':
-    resolution: {integrity: sha512-qIKLKkBkYSyWSYAoDThoxf5y1gr4X0g7W8rDU7d2HDeAAcotdVHUwuKkMeNe6+5VNk7/95EIhbslQjSxiCu32g==}
+  '@napi-rs/canvas-linux-arm64-gnu@0.1.94':
+    resolution: {integrity: sha512-Je5/gKVybWAoIGyDOcJF1zYgBTKWkPIkfOgvCzrQcl8h7DiDvRvEY70EapA+NicGe4X3DW9VsCT34KZJnerShA==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [linux]
 
-  '@napi-rs/canvas-linux-arm64-musl@0.1.93':
-    resolution: {integrity: sha512-mAwQBGM3qArS9XEO21AK4E1uGvCuUCXjhIZk0dlVvs49MQ6wAAuCkYKNFpSKeSicKrLWwBMfgWX4qZoPh+M00A==}
+  '@napi-rs/canvas-linux-arm64-musl@0.1.94':
+    resolution: {integrity: sha512-9YleDDauDEZNsFnfz3HyZvp1LK1ECu8N2gDUg1wtL7uWLQv8dUbfVeFtp5HOdxht1o7LsWRmQeqeIbnD4EqE2A==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [linux]
 
-  '@napi-rs/canvas-linux-riscv64-gnu@0.1.93':
-    resolution: {integrity: sha512-kaIH5MpPzOZfkM+QMsBxGdM9jlJT+N+fwz2IEaju/S+DL65E5TgPOx4QcD5dQ8vsMxlak6uDrudBc4ns5xzZCw==}
+  '@napi-rs/canvas-linux-riscv64-gnu@0.1.94':
+    resolution: {integrity: sha512-lQUy9Xvz7ch8+0AXq8RkioLD41iQ6EqdKFu5uV40BxkBDijB2SCm1jna/BRhqitQRSjwAk2KlLUxTjHChyfNGg==}
     engines: {node: '>= 10'}
     cpu: [riscv64]
     os: [linux]
 
-  '@napi-rs/canvas-linux-x64-gnu@0.1.93':
-    resolution: {integrity: sha512-KtMZJqYWvOSeW5w3VSV2f5iGnwNdKJm4gwgVid4xNy1NFi+NJSyuglA1lX1u4wIPxizyxh8OW5c5Usf6oSOMNQ==}
+  '@napi-rs/canvas-linux-x64-gnu@0.1.94':
+    resolution: {integrity: sha512-0IYgyuUaugHdWxXRhDQUCMxTou8kAHHmpIBFtbmdRlciPlfK7AYQW5agvUU1PghPc5Ja3Zzp5qZfiiLu36vIWQ==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [linux]
 
-  '@napi-rs/canvas-linux-x64-musl@0.1.93':
-    resolution: {integrity: sha512-qRZhOvlDBooRLX6V3/t9X9B+plZK+OrPLgfFixu0A1RO/3VHbubOknfnMnocSDAqk/L6cRyKI83VP2ciR9UO7w==}
+  '@napi-rs/canvas-linux-x64-musl@0.1.94':
+    resolution: {integrity: sha512-xuetfzzcflCIiBw2HJlOU4/+zTqhdxoe1BEcwdBsHAd/5wAQ4Pp+FGPi5g74gDvtcXQmTdEU3fLQvHc/j3wbxQ==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [linux]
 
-  '@napi-rs/canvas-win32-arm64-msvc@0.1.93':
-    resolution: {integrity: sha512-um5XE44vF8bjkQEsH2iRSUP9fDeQGYbn/qjM/v4whXG83qsqapAXlOPOQqSARZB1SiNvPUAuXoRsJLlKFmAEFw==}
+  '@napi-rs/canvas-win32-arm64-msvc@0.1.94':
+    resolution: {integrity: sha512-2F3p8wci4Q4vjbENlQtSibqFWxBdpzYk1c8Jh1mqqLE92rBKElG018dBJ6C8Dp49vE350Hmy5LrfdLgFKMG8sg==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [win32]
 
-  '@napi-rs/canvas-win32-x64-msvc@0.1.93':
-    resolution: {integrity: sha512-maHlizZgmKsAPJwjwBZMnsWfq3Ca9QutoteQwKe7YqsmbECoylrLCCOGCDOredstW4BRWqRTfCl6NJaVVeAQvQ==}
+  '@napi-rs/canvas-win32-x64-msvc@0.1.94':
+    resolution: {integrity: sha512-hjwaIKMrQLoNiu3724octSGhDVKkBwJtMeQ3qUXOi+y60h2q6Sxq3+MM2za3V88+XQzzwn0DgG0Xo6v6gzV8kQ==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [win32]
 
-  '@napi-rs/canvas@0.1.93':
-    resolution: {integrity: sha512-unVFo8CUlUeJCCxt50+j4yy91NF4x6n9zdGcvEsOFAWzowtZm3mgx8X2D7xjwV0cFSfxmpGPoe+JS77uzeFsxg==}
+  '@napi-rs/canvas@0.1.94':
+    resolution: {integrity: sha512-8jBkvqynXNdQPNZjLJxB/Rp9PdnnMSHFBLzPmMc615nlt/O6w0ergBbkEDEOr8EbjL8nRQDpEklPx4pzD7zrbg==}
     engines: {node: '>= 10'}
 
   '@npmcli/agent@3.0.0':
@@ -223,44 +223,47 @@ packages:
   '@types/yauzl@2.10.3':
     resolution: {integrity: sha512-oJoftv0LSuaDZE3Le4DbKX+KS9G36NzOeSap90UIK0yMA/NhKJhqlSGtNDORNRaIbQfzjXDrQa0ytJ6mNRGz/Q==}
 
-  '@xiboplayer/cache@0.2.0':
-    resolution: {integrity: sha512-b2+gl9cLsRM4PVQcQ74Jssmlm2F/kKz5rsEJB0U84Z41Jnkmctb/FY5dDUm07VAqKf+m7m0FGNVzTPWjqcTT5Q==}
+  '@xiboplayer/cache@0.3.1':
+    resolution: {integrity: sha512-HsQTf8dpZ0AIE1cYjcNFjhta5BsSSwDOCSq+2p7PIVOGFfZ7wJBFkMTC/yiBZTd6YfLHBZ4vr1Q+94bJi9hhhg==}
 
-  '@xiboplayer/core@0.2.0':
-    resolution: {integrity: sha512-RDLN3vPYR0sJj1WztzGJ5+/xTGMBoSRSjBhKzzMxePDPUygUcprTnXzto42Ta8Aj91l/RuGWpqcqoTfIRpTyDw==}
+  '@xiboplayer/core@0.3.1':
+    resolution: {integrity: sha512-gsPL/EI1ukmfA/FjwDgAtONi4y8QMO+4i7Jb7K1dQ4wfD2+FpWwXdW51V5O7G3FUw7eyfoX8C6LQLJBn5iWmEw==}
     peerDependencies:
-      '@xiboplayer/cache': 0.2.0
-      '@xiboplayer/renderer': 0.2.0
-      '@xiboplayer/schedule': 0.2.0
-      '@xiboplayer/xmds': 0.2.0
+      '@xiboplayer/cache': 0.3.1
+      '@xiboplayer/renderer': 0.3.1
+      '@xiboplayer/schedule': 0.3.1
+      '@xiboplayer/xmds': 0.3.1
 
   '@xiboplayer/proxy@0.2.0':
     resolution: {integrity: sha512-RDR6pH+K8rMbLAllSvAfsJyzoBcjvdcbRNuAeEfpgfuwq23Hhx1HvHfQYVlxf66I10o+lXPTIWOjmtqlVu6l5Q==}
     hasBin: true
 
-  '@xiboplayer/pwa@0.2.0':
-    resolution: {integrity: sha512-18Of3F1E68auuiH/JKtf5Qjpf84JfsQk7huJMlFS9YNh5BFshah/EvPSknPPgHj3uk9wkL5g1p3o2+i/B6K4+Q==}
+  '@xiboplayer/pwa@0.3.2':
+    resolution: {integrity: sha512-jy+c+S4tsk/UL/rV3vZATv7ZVuV1+ZFLMyYrbiZrR8TCFfFoKug4XaJ+yv9Pvu6MBrRi6u9ZCTFt3p8kk4Dbig==}
 
-  '@xiboplayer/renderer@0.2.0':
-    resolution: {integrity: sha512-08IO1dQdCCDwjb6sFY0XsqXxdH8+M44Kr3nLrfK4bcosuP+BL1ZPVA4/2Whcwn818PEhFbkTac7QRnDrE0jfYw==}
+  '@xiboplayer/renderer@0.3.1':
+    resolution: {integrity: sha512-AVfLO20wSh5fE5aRLygCJqT0AX/5zUCrsOPpxsDlZ+69RKlgI6oGPSewpp6N/oMQBBEeEvNagiivhVcG2fM9Og==}
 
-  '@xiboplayer/schedule@0.2.0':
-    resolution: {integrity: sha512-4MtkgfIyfizQtUpoYwzqh6RL8nPHqcYrH9oyTU81UlwIa2Bc02hc1w0LpP3f/uZZA2vhZh6fp/eYQ8rRlvJpAQ==}
+  '@xiboplayer/schedule@0.3.1':
+    resolution: {integrity: sha512-NW9/xvp9m28x22qLrjD5CBrt3LPspjVdhcprVlh664qCO1TQaexxES9tv5Yr8wHr5HOs+XCJV6LU66CyNxiZiQ==}
 
-  '@xiboplayer/settings@0.2.0':
-    resolution: {integrity: sha512-5LPxtwKwf+HTuGXnxKHgKj4MWrpArVa+gYQcBvdS4HqeoNaeQlk10S0/p4UB1WTIgFRkF4LZk8CLRBWgMuk5Fw==}
+  '@xiboplayer/settings@0.3.1':
+    resolution: {integrity: sha512-vNv6c0gF/hDvmr8ldWGmEJsHglNq/gzB2kGr7udhmcZK3Y7yTtNcHELd0xjGSJ1wmAsNm32FNC643mB5k76dSQ==}
 
-  '@xiboplayer/stats@0.2.0':
-    resolution: {integrity: sha512-r3EHTU+UtTmkpzeg8BRMb1/RlN/g7IK71w2aMfwW2gT2Baa7SkTyJ+F/TeeYTvwinXAwcAIm5yoU2ey1Ehxaxg==}
+  '@xiboplayer/stats@0.3.1':
+    resolution: {integrity: sha512-d1jwYA5gHhmzIeRNaNU3gxeBMH7Cc24xnIPXTfH5RK4g/okOM4V/QemSXzyW4dO7F6G2nANug2eniUQlxiD1Cw==}
 
-  '@xiboplayer/utils@0.2.0':
-    resolution: {integrity: sha512-5eG86eB9+ySykFDT321SihLWEA9XdY/HywH1BvC6fqn6WJ0qPFf6n+8+rwAesSTLutmi8XiDm3tP4tEgM2GzQQ==}
+  '@xiboplayer/sw@0.3.1':
+    resolution: {integrity: sha512-G2mEPojbImLdSv+aSeKlUAtQ7w9rfH06YeCLBQdF7gUeVi6t6gkwhASlHubA/nR3KOuMZyxJeTMLNHIRR/LPDA==}
 
-  '@xiboplayer/xmds@0.2.0':
-    resolution: {integrity: sha512-Z2YfccHnMXzwo9UdKdK3ujDIpUjnKHOtRgr9AV1DPiQ0UCyYtOjA1KMETqdKcNDJWWLeEVHwf792hTsZkAb2bQ==}
+  '@xiboplayer/utils@0.3.1':
+    resolution: {integrity: sha512-LLpAC751uudx355tjuA1OAMz1Ft5/reJhhmf9U0kBT2o1QBKSEkx5oeeY9ZH4WXnl3LVuL1Oz52vsdSpS/katQ==}
 
-  '@xiboplayer/xmr@0.2.0':
-    resolution: {integrity: sha512-H4lNveuoTFXVvFYxiZWPf/fbsGC0RqhIh78smaS2GDhm5RyRxZaJ05vZ7saKKjYyNBazs75pljIM60BY3DhQ7A==}
+  '@xiboplayer/xmds@0.3.1':
+    resolution: {integrity: sha512-cQv5kFPV3GfNwNvwcr5N7WSDLHtmYFiC2NLsqKapSkO6757nDMH5otjjVEwNWgmCtPFvFt55DIeTIszTToK70A==}
+
+  '@xiboplayer/xmr@0.3.1':
+    resolution: {integrity: sha512-JNCg+WSqzWQYt1y+/5DxDVl2ZtMMeqAKU3GOmOKKHkG5jfZKJ9Lh9irjzPklYwru/uaxOprsU+Y7UUwQQWqugw==}
 
   '@xibosignage/xibo-communication-framework@0.0.6':
     resolution: {integrity: sha512-4qRHIfUFZXWK3ZTG+t9w3cwtaULppi/V+pnyX1KWLT07v1dxUJuS8IcZTeAQa0OZ1AlkPIwFtcYZJpo21T/40Q==}
@@ -1834,52 +1837,52 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@napi-rs/canvas-android-arm64@0.1.93':
+  '@napi-rs/canvas-android-arm64@0.1.94':
     optional: true
 
-  '@napi-rs/canvas-darwin-arm64@0.1.93':
+  '@napi-rs/canvas-darwin-arm64@0.1.94':
     optional: true
 
-  '@napi-rs/canvas-darwin-x64@0.1.93':
+  '@napi-rs/canvas-darwin-x64@0.1.94':
     optional: true
 
-  '@napi-rs/canvas-linux-arm-gnueabihf@0.1.93':
+  '@napi-rs/canvas-linux-arm-gnueabihf@0.1.94':
     optional: true
 
-  '@napi-rs/canvas-linux-arm64-gnu@0.1.93':
+  '@napi-rs/canvas-linux-arm64-gnu@0.1.94':
     optional: true
 
-  '@napi-rs/canvas-linux-arm64-musl@0.1.93':
+  '@napi-rs/canvas-linux-arm64-musl@0.1.94':
     optional: true
 
-  '@napi-rs/canvas-linux-riscv64-gnu@0.1.93':
+  '@napi-rs/canvas-linux-riscv64-gnu@0.1.94':
     optional: true
 
-  '@napi-rs/canvas-linux-x64-gnu@0.1.93':
+  '@napi-rs/canvas-linux-x64-gnu@0.1.94':
     optional: true
 
-  '@napi-rs/canvas-linux-x64-musl@0.1.93':
+  '@napi-rs/canvas-linux-x64-musl@0.1.94':
     optional: true
 
-  '@napi-rs/canvas-win32-arm64-msvc@0.1.93':
+  '@napi-rs/canvas-win32-arm64-msvc@0.1.94':
     optional: true
 
-  '@napi-rs/canvas-win32-x64-msvc@0.1.93':
+  '@napi-rs/canvas-win32-x64-msvc@0.1.94':
     optional: true
 
-  '@napi-rs/canvas@0.1.93':
+  '@napi-rs/canvas@0.1.94':
     optionalDependencies:
-      '@napi-rs/canvas-android-arm64': 0.1.93
-      '@napi-rs/canvas-darwin-arm64': 0.1.93
-      '@napi-rs/canvas-darwin-x64': 0.1.93
-      '@napi-rs/canvas-linux-arm-gnueabihf': 0.1.93
-      '@napi-rs/canvas-linux-arm64-gnu': 0.1.93
-      '@napi-rs/canvas-linux-arm64-musl': 0.1.93
-      '@napi-rs/canvas-linux-riscv64-gnu': 0.1.93
-      '@napi-rs/canvas-linux-x64-gnu': 0.1.93
-      '@napi-rs/canvas-linux-x64-musl': 0.1.93
-      '@napi-rs/canvas-win32-arm64-msvc': 0.1.93
-      '@napi-rs/canvas-win32-x64-msvc': 0.1.93
+      '@napi-rs/canvas-android-arm64': 0.1.94
+      '@napi-rs/canvas-darwin-arm64': 0.1.94
+      '@napi-rs/canvas-darwin-x64': 0.1.94
+      '@napi-rs/canvas-linux-arm-gnueabihf': 0.1.94
+      '@napi-rs/canvas-linux-arm64-gnu': 0.1.94
+      '@napi-rs/canvas-linux-arm64-musl': 0.1.94
+      '@napi-rs/canvas-linux-riscv64-gnu': 0.1.94
+      '@napi-rs/canvas-linux-x64-gnu': 0.1.94
+      '@napi-rs/canvas-linux-x64-musl': 0.1.94
+      '@napi-rs/canvas-win32-arm64-msvc': 0.1.94
+      '@napi-rs/canvas-win32-x64-msvc': 0.1.94
     optional: true
 
   '@npmcli/agent@3.0.0':
@@ -1954,18 +1957,18 @@ snapshots:
       '@types/node': 24.10.13
     optional: true
 
-  '@xiboplayer/cache@0.2.0':
+  '@xiboplayer/cache@0.3.1':
     dependencies:
-      '@xiboplayer/utils': 0.2.0
+      '@xiboplayer/utils': 0.3.1
       spark-md5: 3.0.2
 
-  '@xiboplayer/core@0.2.0(@xiboplayer/cache@0.2.0)(@xiboplayer/renderer@0.2.0)(@xiboplayer/schedule@0.2.0)(@xiboplayer/xmds@0.2.0)':
+  '@xiboplayer/core@0.3.1(@xiboplayer/cache@0.3.1)(@xiboplayer/renderer@0.3.1)(@xiboplayer/schedule@0.3.1)(@xiboplayer/xmds@0.3.1)':
     dependencies:
-      '@xiboplayer/cache': 0.2.0
-      '@xiboplayer/renderer': 0.2.0
-      '@xiboplayer/schedule': 0.2.0
-      '@xiboplayer/utils': 0.2.0
-      '@xiboplayer/xmds': 0.2.0
+      '@xiboplayer/cache': 0.3.1
+      '@xiboplayer/renderer': 0.3.1
+      '@xiboplayer/schedule': 0.3.1
+      '@xiboplayer/utils': 0.3.1
+      '@xiboplayer/xmds': 0.3.1
       '@xibosignage/xibo-communication-framework': 0.0.6
       nanoevents: 9.1.0
 
@@ -1976,48 +1979,53 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@xiboplayer/pwa@0.2.0':
+  '@xiboplayer/pwa@0.3.2':
     dependencies:
-      '@xiboplayer/cache': 0.2.0
-      '@xiboplayer/core': 0.2.0(@xiboplayer/cache@0.2.0)(@xiboplayer/renderer@0.2.0)(@xiboplayer/schedule@0.2.0)(@xiboplayer/xmds@0.2.0)
-      '@xiboplayer/renderer': 0.2.0
-      '@xiboplayer/schedule': 0.2.0
-      '@xiboplayer/settings': 0.2.0
-      '@xiboplayer/stats': 0.2.0
-      '@xiboplayer/utils': 0.2.0
-      '@xiboplayer/xmds': 0.2.0
-      '@xiboplayer/xmr': 0.2.0
+      '@xiboplayer/cache': 0.3.1
+      '@xiboplayer/core': 0.3.1(@xiboplayer/cache@0.3.1)(@xiboplayer/renderer@0.3.1)(@xiboplayer/schedule@0.3.1)(@xiboplayer/xmds@0.3.1)
+      '@xiboplayer/renderer': 0.3.1
+      '@xiboplayer/schedule': 0.3.1
+      '@xiboplayer/settings': 0.3.1
+      '@xiboplayer/stats': 0.3.1
+      '@xiboplayer/sw': 0.3.1
+      '@xiboplayer/utils': 0.3.1
+      '@xiboplayer/xmds': 0.3.1
+      '@xiboplayer/xmr': 0.3.1
       html2canvas: 1.4.1
       nanoevents: 9.1.0
       xml2js: 0.6.2
 
-  '@xiboplayer/renderer@0.2.0':
+  '@xiboplayer/renderer@0.3.1':
     dependencies:
-      '@xiboplayer/utils': 0.2.0
+      '@xiboplayer/utils': 0.3.1
       nanoevents: 9.1.0
       pdfjs-dist: 4.10.38
 
-  '@xiboplayer/schedule@0.2.0':
+  '@xiboplayer/schedule@0.3.1':
     dependencies:
-      '@xiboplayer/utils': 0.2.0
+      '@xiboplayer/utils': 0.3.1
 
-  '@xiboplayer/settings@0.2.0':
+  '@xiboplayer/settings@0.3.1':
     dependencies:
-      '@xiboplayer/utils': 0.2.0
+      '@xiboplayer/utils': 0.3.1
 
-  '@xiboplayer/stats@0.2.0':
+  '@xiboplayer/stats@0.3.1':
     dependencies:
-      '@xiboplayer/utils': 0.2.0
+      '@xiboplayer/utils': 0.3.1
 
-  '@xiboplayer/utils@0.2.0': {}
-
-  '@xiboplayer/xmds@0.2.0':
+  '@xiboplayer/sw@0.3.1':
     dependencies:
-      '@xiboplayer/utils': 0.2.0
+      '@xiboplayer/cache': 0.3.1
 
-  '@xiboplayer/xmr@0.2.0':
+  '@xiboplayer/utils@0.3.1': {}
+
+  '@xiboplayer/xmds@0.3.1':
     dependencies:
-      '@xiboplayer/utils': 0.2.0
+      '@xiboplayer/utils': 0.3.1
+
+  '@xiboplayer/xmr@0.3.1':
+    dependencies:
+      '@xiboplayer/utils': 0.3.1
       '@xibosignage/xibo-communication-framework': 0.0.6
 
   '@xibosignage/xibo-communication-framework@0.0.6': {}
@@ -3168,7 +3176,7 @@ snapshots:
 
   pdfjs-dist@4.10.38:
     optionalDependencies:
-      '@napi-rs/canvas': 0.1.93
+      '@napi-rs/canvas': 0.1.94
 
   pe-library@0.4.1: {}
 
