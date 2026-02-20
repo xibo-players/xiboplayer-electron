@@ -124,6 +124,18 @@ if [ $1 -eq 0 ] ; then
 fi
 
 %changelog
+* Thu Feb 20 2026 Pau Aliagas <linuxnow@gmail.com> - 0.3.4-1
+- Bump to 0.3.4 (unified versioning across all packages)
+- Pick up SDK 0.3.4 with RSA key generation (@xiboplayer/crypto)
+- Pick up PWA 0.3.4 with crypto dependency
+
+* Thu Feb 20 2026 Pau Aliagas <linuxnow@gmail.com> - 0.3.1-1
+- Pick up @xiboplayer/pwa 0.3.2 with service worker refactor
+- Pick up SDK 0.3.0 (@xiboplayer/sw split out)
+
+* Wed Feb 19 2026 Pau Aliagas <linuxnow@gmail.com> - 0.3.0-1
+- Bump SDK dependencies to 0.3.0 (SW refactored into @xiboplayer/sw)
+
 * Tue Feb 18 2026 Pau Aliagas <linuxnow@gmail.com> - 0.2.0-1
 - Filter bogus libc.so/libdl/libpthread/librt auto-requires
 - Add Provides: bundled(electron) per Fedora Bundling guidelines
