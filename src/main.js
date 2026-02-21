@@ -321,6 +321,8 @@ function createWindow() {
   // Log renderer console output to main process console (useful for debugging)
   mainWindow.webContents.on('console-message', (_event, level, message, line, sourceId) => {
     if (isDev || level >= 2) { // level 2 = warning, 3 = error
+      // Filter out upstream XMR framework bug: console.debug(event) logs "[object MessageEvent]"
+      if (message === '[object MessageEvent]') return;
       const prefix = level === 3 ? '[Renderer ERROR]' : level === 2 ? '[Renderer WARN]' : '[Renderer]';
       console.log(`${prefix} ${message}`);
     }
