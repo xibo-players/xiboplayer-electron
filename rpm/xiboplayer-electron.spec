@@ -124,6 +124,9 @@ if [ $1 -eq 0 ] ; then
 fi
 
 %changelog
+* Sat Feb 21 2026 Pau Aliagas <linuxnow@gmail.com> - 0.3.7-1
+- Bump to 0.3.7
+
 * Thu Feb 20 2026 Pau Aliagas <linuxnow@gmail.com> - 0.3.4-1
 - Bump to 0.3.4 (unified versioning across all packages)
 - Pick up SDK 0.3.4 with RSA key generation (@xiboplayer/crypto)
