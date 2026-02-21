@@ -124,6 +124,9 @@ if [ $1 -eq 0 ] ; then
 fi
 
 %changelog
+* Sat Feb 21 2026 Pau Aliagas <linuxnow@gmail.com> - 0.4.0-1
+- Multi-display
+
 * Sat Feb 21 2026 Pau Aliagas <linuxnow@gmail.com> - 0.3.7-1
 - Bump to 0.3.7
 
