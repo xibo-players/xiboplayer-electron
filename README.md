@@ -128,9 +128,22 @@ journalctl --user -u xiboplayer-electron.service -f
 
 ### Keyboard Shortcuts
 
+**Electron shortcuts:**
 - **Ctrl+Shift+F12** - Show system tray menu
 - **Ctrl+Shift+R** - Reload player
 - **Ctrl+Shift+I** - Toggle DevTools (dev mode only)
+
+**PWA player shortcuts (work inside Electron):**
+
+| Key | Action |
+|-----|--------|
+| `T` | Toggle timeline overlay — shows upcoming scheduled layouts with conflict indicators |
+| `D` | Toggle download overlay — shows media download progress |
+| `V` | Toggle video controls — show/hide native browser controls on all videos |
+| `→` / `PageDown` | Skip to next layout |
+| `←` / `PageUp` | Go to previous layout |
+| `Space` | Pause / resume playback |
+| `R` | Revert to scheduled layout (when manually overridden) |
 
 ### System Tray Menu
 
