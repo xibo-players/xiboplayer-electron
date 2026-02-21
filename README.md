@@ -48,7 +48,7 @@ sudo dnf install xiboplayer-electron-*.rpm
 
 ### Configuration File
 
-Location: `~/.config/@xiboplayer/electron-pwa/config.json`
+Location: `~/.config/@xiboplayer/electron/config.json`
 
 ```json
 {
@@ -264,7 +264,7 @@ journalctl --user -u xiboplayer-electron.service -n 50
 
 ```bash
 # Check PWA files exist
-ls -la ~/.local/share/@xiboplayer/electron-pwa/pwa/
+ls -la ~/.local/share/@xiboplayer/electron/pwa/
 
 # Reinstall package
 sudo dnf reinstall xiboplayer-electron-*.rpm
@@ -308,7 +308,7 @@ sudo dnf remove xiboplayer-electron
 Configuration files are preserved during uninstallation. To remove manually:
 
 ```bash
-rm -rf ~/.config/@xiboplayer/electron-pwa
+rm -rf ~/.config/@xiboplayer/electron
 rm -rf ~/.config/systemd/user/xiboplayer-electron.service
 rm -rf ~/.local/share/applications/xiboplayer-electron.desktop
 ```
