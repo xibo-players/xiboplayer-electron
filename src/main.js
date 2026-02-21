@@ -215,6 +215,12 @@ function createWindow() {
     console.log(`${prefix} ${details.message}`);
   });
 
+  // ─── Auto-approve permissions (no dialogs in kiosk mode) ─────────────
+  mainWindow.webContents.session.setPermissionRequestHandler((_webContents, permission, callback) => {
+    const allowed = ['geolocation', 'notifications', 'media', 'mediaKeySystem', 'fullscreen'];
+    callback(allowed.includes(permission));
+  });
+
   // ─── Auto-approve screen capture (no permission dialog) ──────────────
   // If the PWA calls getDisplayMedia() (e.g. before electronAPI is ready),
   // auto-select the BrowserWindow as the capture source instead of showing
