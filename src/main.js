@@ -18,6 +18,9 @@ const fs = require('fs');
 const Store = require('electron-store');
 const AutoLaunch = require('electron-auto-launch');
 
+// Use consistent config path: ~/.config/xiboplayer/electron/
+app.setPath('userData', path.join(app.getPath('appData'), 'xiboplayer', 'electron'));
+
 // GPU acceleration flags — must be set before app.whenReady()
 // Electron 40+ (Chromium 144) auto-detects Wayland via ozone-platform-hint=auto.
 // Do NOT force --ozone-platform=wayland — it breaks Vulkan/GL negotiation.
