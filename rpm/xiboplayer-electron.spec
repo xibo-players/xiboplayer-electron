@@ -124,6 +124,9 @@ if [ $1 -eq 0 ] ; then
 fi
 
 %changelog
+* Sun Feb 22 2026 Pau Aliagas <linuxnow@gmail.com> - 0.4.1-1
+- Fix timeline duration calculation, overlay alignment, and remaining-duration display
+
 * Sat Feb 21 2026 Pau Aliagas <linuxnow@gmail.com> - 0.4.0-1
 - Multi-display
 
