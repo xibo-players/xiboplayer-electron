@@ -124,6 +124,9 @@ if [ $1 -eq 0 ] ; then
 fi
 
 %changelog
+* Mon Feb 23 2026 Pau Aliagas <linuxnow@gmail.com> - 0.4.4-1
+- Bump to 0.4.4
+
 * Mon Feb 23 2026 Pau Aliagas <linuxnow@gmail.com> - 0.4.3-1
 - Bump to 0.4.3
 
