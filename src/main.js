@@ -18,8 +18,12 @@ const fs = require('fs');
 const Store = require('electron-store');
 const AutoLaunch = require('electron-auto-launch');
 
-// Use consistent config path: ~/.config/xiboplayer/electron/
+// XDG-compliant paths: config in ~/.config, data in ~/.local/share
+// Config (electron-store, preferences): ~/.config/xiboplayer/electron/
 app.setPath('userData', path.join(app.getPath('appData'), 'xiboplayer', 'electron'));
+// Session data (Cache, IndexedDB, Service Worker, cookies): ~/.local/share/xiboplayer/electron/
+const dataHome = process.env.XDG_DATA_HOME || path.join(require('os').homedir(), '.local', 'share');
+app.setPath('sessionData', path.join(dataHome, 'xiboplayer', 'electron'));
 
 // GPU acceleration flags — must be set before app.whenReady()
 // Electron 40+ (Chromium 144) auto-detects Wayland via ozone-platform-hint=auto.
@@ -238,11 +242,11 @@ function createWindow() {
   // Hide menu bar
   Menu.setApplicationMenu(null);
 
-  // Load PWA from local server at /player/pwa/
+  // Load PWA from local server at /player/
   // In dev mode, enable DEBUG logging via URL param (logger defaults to WARNING)
   const serverPort = cliPort || store.get('serverPort', CONFIG_DEFAULTS.serverPort);
   const logParam = isDev ? '?logLevel=DEBUG' : '';
-  const url = `http://localhost:${serverPort}/player/pwa/${logParam}`;
+  const url = `http://localhost:${serverPort}/player/${logParam}`;
 
   console.log(`[Window] Loading URL: ${url}`);
 
