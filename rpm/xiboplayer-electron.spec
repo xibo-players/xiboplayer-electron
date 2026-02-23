@@ -9,11 +9,11 @@
 
 Name:           xiboplayer-electron
 Version:        %{_version}
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Xibo digital signage player (Electron)
 
 License:        AGPL-3.0-or-later
-URL:            https://github.com/xibo-players/%{name}
+URL:            https://xiboplayer.org
 Source0:        %{name}-%{version}-linux-unpacked.tar.gz
 
 ExclusiveArch:  x86_64 aarch64
@@ -124,6 +124,10 @@ if [ $1 -eq 0 ] ; then
 fi
 
 %changelog
+* Sun Feb 23 2026 Pau Aliagas <linuxnow@gmail.com> - 0.4.5-3
+- Update homepage URL to https://xiboplayer.org
+- Update application icon to branded play triangle
+
 * Mon Feb 23 2026 Pau Aliagas <linuxnow@gmail.com> - 0.4.5-1
 - Fix
 

@@ -121,7 +121,7 @@ Description: Xibo digital signage player (Electron)
  Xibo Player wrapped in Electron for desktop and kiosk digital signage.
  Provides a native application with built-in HTTP server, offline support,
  system tray integration, and automatic launch via systemd.
-Homepage: https://github.com/xibo-players/xiboplayer-electron
+Homepage: https://xiboplayer.org
 EOF
 
 # Build DEB package

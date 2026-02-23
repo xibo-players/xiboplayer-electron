@@ -6,7 +6,7 @@
   "author": "Pau Aliagas <linuxnow@gmail.com>",
   "packageManager": "pnpm@10.7.0",
   "license": "AGPL-3.0",
-  "homepage": "https://github.com/xibo-players/xiboplayer-electron",
+  "homepage": "https://xiboplayer.org",
   "repository": {
     "type": "git",
     "url": "https://github.com/xibo-players/xiboplayer-electron.git"
