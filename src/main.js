@@ -98,6 +98,38 @@ function getPwaPath() {
 }
 
 /**
+ * Clear Service Worker registrations when the bundled PWA version changes.
+ * Reads version from the PWA's package.json and compares with the stored
+ * version in electron-store.  On mismatch, wipes SW + caches so the new
+ * build starts clean (no stale content-hashed assets).
+ */
+async function clearStaleServiceWorker() {
+  try {
+    const pwaPath = getPwaPath();
+    const pkgPath = path.join(pwaPath, '../package.json');
+    const pwaVersion = JSON.parse(fs.readFileSync(pkgPath, 'utf8')).version;
+    const lastVersion = store.get('_pwaVersion', '');
+
+    if (lastVersion && lastVersion !== pwaVersion) {
+      console.log(`[SW-Clean] PWA version changed: ${lastVersion} → ${pwaVersion}, clearing session data`);
+      const sessionDir = app.getPath('sessionData');
+      const dirs = ['Service Worker', 'Cache', 'Code Cache', 'blob_storage'];
+      for (const dir of dirs) {
+        const target = path.join(sessionDir, dir);
+        try {
+          fs.rmSync(target, { recursive: true, force: true });
+        } catch (_) {}
+      }
+    } else if (!lastVersion) {
+      console.log(`[SW-Clean] First run, recording PWA version ${pwaVersion}`);
+    }
+    store.set('_pwaVersion', pwaVersion);
+  } catch (err) {
+    console.warn('[SW-Clean] Version check failed (non-fatal):', err.message);
+  }
+}
+
+/**
  * Create and configure the Express server to serve PWA files.
  * Uses @xiboplayer/proxy for CORS proxy routes and PWA static serving.
  */
@@ -327,7 +359,7 @@ function createWindow() {
 
   // Log renderer console output to main process console (useful for debugging)
   mainWindow.webContents.on('console-message', (_event, level, message, line, sourceId) => {
-    if (isDev || level >= 2) { // level 2 = warning, 3 = error
+    if (true) { // TODO: revert to (isDev || level >= 2) once startup is stable
       // Filter out upstream XMR framework bug: console.debug(event) logs "[object MessageEvent]"
       if (message === '[object MessageEvent]') return;
       const prefix = level === 3 ? '[Renderer ERROR]' : level === 2 ? '[Renderer WARN]' : '[Renderer]';
@@ -683,6 +715,14 @@ app.whenReady().then(async () => {
 
   // Create Express server to serve PWA files
   await createExpressServer();
+
+  // Clear stale Service Worker when bundled PWA version changes.
+  // A version mismatch means the SW may cache index.html referencing
+  // content-hashed assets (main-XXXX.js) that no longer exist in the
+  // new build — Express would serve HTML fallback → MIME type error
+  // → black screen.  Clearing only on version change preserves offline
+  // capability during normal operation.
+  await clearStaleServiceWorker();
 
   // Create main window
   createWindow();
