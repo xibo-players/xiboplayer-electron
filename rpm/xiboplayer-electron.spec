@@ -124,6 +124,9 @@ if [ $1 -eq 0 ] ; then
 fi
 
 %changelog
+* Mon Feb 23 2026 Pau Aliagas <linuxnow@gmail.com> - 0.4.6-1
+- Update homepage URL to xiboplayer.org and branded icon
+
 * Sun Feb 23 2026 Pau Aliagas <linuxnow@gmail.com> - 0.4.5-3
 - Update homepage URL to https://xiboplayer.org
 - Update application icon to branded play triangle
