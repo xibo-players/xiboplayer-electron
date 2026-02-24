@@ -41,10 +41,9 @@ const APP_VERSION = '0.2.1';
 
 // Configuration
 const CONFIG_DEFAULTS = {
-  cmsAddress: '',
+  cmsUrl: '',
   cmsKey: '',
   displayName: '',
-  cmsUrl: '',
   hardwareKey: '',
   serverPort: 8765,
   kioskMode: true,
@@ -90,7 +89,7 @@ const cliDisplayName = displayNameArg ? displayNameArg.split('=').slice(1).join(
 // Persist CLI CMS args into the store so they survive restarts and
 // are available for server-side config injection via the proxy.
 if (cliCmsUrl) {
-  store.set('cmsAddress', cliCmsUrl);
+  store.set('cmsUrl', cliCmsUrl);
   if (cliCmsKey) store.set('cmsKey', cliCmsKey);
   if (cliDisplayName) store.set('displayName', cliDisplayName);
 }
@@ -152,10 +151,10 @@ async function createExpressServer() {
   console.log(`[Express] Starting server on port: ${serverPort}`);
 
   // Build cmsConfig from store (populated by CLI args or config file edits)
-  const cmsAddress = store.get('cmsAddress', '');
+  const cmsUrl = store.get('cmsUrl', '');
   const cmsKey = store.get('cmsKey', '');
   const displayName = store.get('displayName', '');
-  const cmsConfig = cmsAddress ? { cmsAddress, cmsKey, displayName } : undefined;
+  const cmsConfig = cmsUrl ? { cmsUrl, cmsKey, displayName } : undefined;
 
   const { createProxyApp } = await import('@xiboplayer/proxy');
   const expressApp = createProxyApp({ pwaPath, appVersion: APP_VERSION, cmsConfig });
