@@ -9,11 +9,11 @@ importers:
   .:
     dependencies:
       '@xiboplayer/proxy':
-        specifier: ^0.4.7
-        version: 0.4.7
+        specifier: ^0.4.9
+        version: 0.4.9
       '@xiboplayer/pwa':
-        specifier: ^0.4.7
-        version: 0.4.7
+        specifier: ^0.4.9
+        version: 0.4.9
       electron-auto-launch:
         specifier: ^5.0.7
         version: 5.0.7
@@ -237,12 +237,12 @@ packages:
   '@xiboplayer/crypto@0.4.7':
     resolution: {integrity: sha512-RewTV6K+7SEXWk5wrpjPkplV6qKg2jadk3jHwU0DelgtHSW08C2Es8wXQLyjBcssv2wFSXf7rAvQlqVXmFYTqQ==}
 
-  '@xiboplayer/proxy@0.4.7':
-    resolution: {integrity: sha512-d6vc5KGw12nXXVaq86pG6LxtAaTA4enVQPgNcmZ/F+5uBfInejJl/trNybG9Jc++kh/TdOeToQMDDRUFc3916w==}
+  '@xiboplayer/proxy@0.4.9':
+    resolution: {integrity: sha512-UFIu+D4WhQSbXfUMGOu5lfW1efb2hSymuszBOVqjJIR+E6xo7Pb7IM3JrksjIxIujofVSDetfvmt9isuOscJJg==}
     hasBin: true
 
-  '@xiboplayer/pwa@0.4.7':
-    resolution: {integrity: sha512-POIzY8ofkbchouvTF6qrcnc2dicifWa5NhzyyXKpiEyZrtFhIoGdk2rbJno5obFWNM1rd/h1PF/OL5f3Kpd8HA==}
+  '@xiboplayer/pwa@0.4.9':
+    resolution: {integrity: sha512-v6vZ1hwE9dtZ5gum0b9sRs1/iMI6B2JVoOcIXzT+G7K3H3ItDN9/6pEWwLp53nnfDHLSE3fRUUj1xbIfMH+EVg==}
 
   '@xiboplayer/renderer@0.4.7':
     resolution: {integrity: sha512-M+TKlf+9nqOoCWnh1wVdJYNb+HxPItY5wKj9Y4ToiK5YIel+gEUoAEWx/sHQgifG1KIQ3CpfH/B4N2J1jtufIA==}
@@ -1980,14 +1980,14 @@ snapshots:
 
   '@xiboplayer/crypto@0.4.7': {}
 
-  '@xiboplayer/proxy@0.4.7':
+  '@xiboplayer/proxy@0.4.9':
     dependencies:
       cors: 2.8.6
       express: 5.2.1
     transitivePeerDependencies:
       - supports-color
 
-  '@xiboplayer/pwa@0.4.7':
+  '@xiboplayer/pwa@0.4.9':
     dependencies:
       '@xiboplayer/cache': 0.4.7
       '@xiboplayer/core': 0.4.7(@xiboplayer/cache@0.4.7)(@xiboplayer/renderer@0.4.7)(@xiboplayer/schedule@0.4.7)(@xiboplayer/xmds@0.4.7)
