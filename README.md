@@ -46,35 +46,59 @@ sudo dnf install xiboplayer-electron-*.rpm
 
 ## Configuration
 
-### Configuration File
+### Config file — `config.json` (recommended for provisioning)
 
-Location: `~/.config/@xiboplayer/electron/config.json`
+Place a config file at `~/.config/xiboplayer/electron/config.json` before first launch:
 
 ```json
 {
   "cmsUrl": "https://your-cms.example.com",
-  "hardwareKey": "your-hardware-key",
-  "serverPort": 8765,
-  "kioskMode": true,
-  "autoLaunch": false,
-  "fullscreen": true,
-  "hideMouseCursor": true,
-  "preventSleep": true,
-  "width": 1920,
-  "height": 1080
+  "cmsKey": "your-cms-key",
+  "displayName": "Lobby Display"
 }
 ```
 
-### Command-Line Arguments
+On first boot, if the player has no existing CMS configuration, it reads this
+file and seeds the internal store. The player then registers with the CMS and
+shows a setup screen while it waits for administrator authorization. Once
+authorized, it starts playing the scheduled content.
+
+The file is only read when the store has no `cmsUrl` yet — after first boot
+it is effectively ignored. CLI args always take priority.
+
+### Setup screen (interactive)
+
+If no `config.json` is present and no CLI args are provided, the player shows
+a setup screen where you enter the CMS URL, key, and display name in the
+browser. If registration fails (wrong URL, CMS unreachable), the player
+redirects back to the setup screen automatically.
+
+### Command-line arguments
 
 ```bash
 xiboplayer-electron --dev              # Development mode (enables DevTools)
 xiboplayer-electron --no-kiosk         # Disable kiosk mode
 xiboplayer-electron --port=8080        # Custom Express server port
-xiboplayer-electron --cms-url=URL      # Override CMS URL
-xiboplayer-electron --cms-key=KEY      # Override hardware key
-xiboplayer-electron --display-name=NAME  # Override display name
+xiboplayer-electron --cms-url=URL      # CMS URL
+xiboplayer-electron --cms-key=KEY      # CMS key
+xiboplayer-electron --display-name=NAME  # Display name
 ```
+
+CLI args are persisted to the internal store and survive restarts.
+
+### Config priority
+
+1. **CLI args** — always win, written to store unconditionally
+2. **config.json** — read only on first boot (store empty)
+3. **Setup screen** — interactive fallback when nothing else is configured
+
+### Paths
+
+| Purpose | Path |
+|---------|------|
+| Config (electron-store, preferences) | `~/.config/xiboplayer/electron/` |
+| Session data (Cache, IndexedDB, SW) | `~/.local/share/xiboplayer/electron/` |
+| CMS config file for provisioning | `~/.config/xiboplayer/electron/config.json` |
 
 ### Log Levels
 
@@ -271,7 +295,7 @@ This works even when the player is in kiosk mode. To force a full re-registratio
 
 ```bash
 # Wipe all config and restart — shows setup screen
-rm -rf ~/.config/@xiboplayer/electron
+rm -rf ~/.config/xiboplayer/electron
 systemctl --user restart xiboplayer-electron.service
 ```
 
@@ -294,7 +318,7 @@ journalctl --user -u xiboplayer-electron.service -n 50
 
 ```bash
 # Check PWA files exist
-ls -la ~/.local/share/@xiboplayer/electron/pwa/
+ls -la ~/.local/share/xiboplayer/electron/pwa/
 
 # Reinstall package
 sudo dnf reinstall xiboplayer-electron-*.rpm
@@ -338,7 +362,7 @@ sudo dnf remove xiboplayer-electron
 Configuration files are preserved during uninstallation. To remove manually:
 
 ```bash
-rm -rf ~/.config/@xiboplayer/electron
+rm -rf ~/.config/xiboplayer/electron
 rm -rf ~/.config/systemd/user/xiboplayer-electron.service
 rm -rf ~/.local/share/applications/xiboplayer-electron.desktop
 ```
