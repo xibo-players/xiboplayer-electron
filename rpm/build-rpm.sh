@@ -56,7 +56,7 @@ echo "    $TARBALL ($(du -h "$TARBALL" | cut -f1))"
 # Copy spec and build
 cp "$SPEC_DIR/xiboplayer-electron.spec" ~/rpmbuild/SPECS/
 echo "==> Running rpmbuild..."
-rpmbuild -bb ~/rpmbuild/SPECS/xiboplayer-electron.spec \
+rpmbuild -ba ~/rpmbuild/SPECS/xiboplayer-electron.spec \
     --define "_version $VERSION"
 
 # Show result
@@ -71,4 +71,11 @@ if [ -n "$RPM_FILE" ]; then
 else
     echo "ERROR: RPM not found in ~/rpmbuild/RPMS/"
     exit 1
+fi
+
+# Copy SRPM to output
+SRPM_FILE=$(ls -1t ~/rpmbuild/SRPMS/$NAME-$VERSION-*.src.rpm 2>/dev/null | head -1)
+if [ -n "$SRPM_FILE" ]; then
+    cp "$SRPM_FILE" "$ELECTRON_DIR/dist-packages/"
+    echo "==> SRPM: $(basename "$SRPM_FILE") ($(du -h "$SRPM_FILE" | cut -f1))"
 fi

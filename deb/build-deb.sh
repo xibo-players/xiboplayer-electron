@@ -140,5 +140,81 @@ else
     exit 1
 fi
 
-# Clean up
+# Clean up binary build
 rm -rf "$DEB_DIR"
+
+# --- Build source package (once, arch-independent) ---
+SRC_MARKER="$ELECTRON_DIR/dist-packages/.source-built"
+if [ ! -f "$SRC_MARKER" ]; then
+    echo "==> Building source package..."
+    SRC_BUILD="$ELECTRON_DIR/deb-src"
+    rm -rf "$SRC_BUILD"
+    SRC_NAME="${NAME}-${VERSION}"
+    mkdir -p "$SRC_BUILD/$SRC_NAME"
+
+    # Create orig tarball from repo source (exclude build artifacts)
+    tar czf "$SRC_BUILD/${NAME}_${VERSION}.orig.tar.gz" \
+        -C "$ELECTRON_DIR" \
+        --exclude=dist-packages --exclude=deb-pkg --exclude=deb-src \
+        --exclude=node_modules --exclude=.git \
+        --transform="s|^\.|${SRC_NAME}|" .
+
+    # Extract for dpkg-source
+    cd "$SRC_BUILD"
+    tar xf "${NAME}_${VERSION}.orig.tar.gz"
+
+    # Create debian/ directory
+    mkdir -p "$SRC_BUILD/$SRC_NAME/debian/source"
+    echo "3.0 (quilt)" > "$SRC_BUILD/$SRC_NAME/debian/source/format"
+
+    cat > "$SRC_BUILD/$SRC_NAME/debian/control" << EOF
+Source: ${NAME}
+Section: misc
+Priority: optional
+Maintainer: Pau Aliagas <linuxnow@gmail.com>
+Build-Depends: debhelper (>= 12), nodejs, npm
+Standards-Version: 4.6.0
+Homepage: https://xiboplayer.org
+
+Package: ${NAME}
+Architecture: any
+Depends: libgtk-3-0, libnss3, libasound2, libgbm1, libatspi2.0-0, libxtst6, xdg-utils
+Description: Xibo digital signage player (Electron)
+ Xibo Player wrapped in Electron for desktop and kiosk digital signage.
+ Provides a native application with built-in HTTP server, offline support,
+ system tray integration, and automatic launch via systemd.
+EOF
+
+    cat > "$SRC_BUILD/$SRC_NAME/debian/changelog" << EOF
+${NAME} (${VERSION}) stable; urgency=medium
+
+  * Release ${VERSION}
+
+ -- Pau Aliagas <linuxnow@gmail.com>  $(date -R)
+EOF
+
+    cat > "$SRC_BUILD/$SRC_NAME/debian/rules" << 'EOF'
+#!/usr/bin/make -f
+%:
+	dh $@
+EOF
+    chmod +x "$SRC_BUILD/$SRC_NAME/debian/rules"
+
+    echo "12" > "$SRC_BUILD/$SRC_NAME/debian/compat"
+
+    # Build source package
+    cd "$SRC_BUILD/$SRC_NAME"
+    dpkg-source -b .
+    cd "$SCRIPT_DIR"
+
+    # Copy source package files to output
+    cp "$SRC_BUILD"/*.dsc "$ELECTRON_DIR/dist-packages/" 2>/dev/null || true
+    cp "$SRC_BUILD"/*.orig.tar.* "$ELECTRON_DIR/dist-packages/" 2>/dev/null || true
+    cp "$SRC_BUILD"/*.debian.tar.* "$ELECTRON_DIR/dist-packages/" 2>/dev/null || true
+
+    echo "==> Source package files:"
+    ls -lh "$ELECTRON_DIR/dist-packages/"*.dsc "$ELECTRON_DIR/dist-packages/"*.tar.* 2>/dev/null || true
+
+    touch "$SRC_MARKER"
+    rm -rf "$SRC_BUILD"
+fi
