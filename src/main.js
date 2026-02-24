@@ -783,6 +783,21 @@ app.on('window-all-closed', () => {
 });
 
 /**
+ * Handle SIGTERM/SIGINT for clean systemd shutdown
+ */
+process.on('SIGTERM', () => {
+  console.log('[App] Received SIGTERM, shutting down');
+  if (expressServer) expressServer.close();
+  app.quit();
+});
+
+process.on('SIGINT', () => {
+  console.log('[App] Received SIGINT, shutting down');
+  if (expressServer) expressServer.close();
+  app.quit();
+});
+
+/**
  * Handle unhandled errors gracefully
  */
 process.on('uncaughtException', (error) => {
