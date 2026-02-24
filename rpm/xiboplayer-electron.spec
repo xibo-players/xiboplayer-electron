@@ -86,14 +86,19 @@ Documentation=https://github.com/xibo-players/xiboplayer-electron
 Type=simple
 ExecStart=%{_bindir}/xiboplayer-electron --no-sandbox
 Restart=always
-RestartSec=10
+RestartSec=5
 Environment=NODE_ENV=production
-TimeoutStopSec=10
+TimeoutStopSec=15
+TimeoutStopFailureMode=terminate
 KillMode=mixed
 KillSignal=SIGTERM
+FinalKillSignal=SIGKILL
+LimitCORE=0
 StandardOutput=journal
 StandardError=journal
 SyslogIdentifier=xiboplayer-electron
+StartLimitIntervalSec=60
+StartLimitBurst=5
 
 [Install]
 WantedBy=graphical-session.target
@@ -125,60 +130,4 @@ fi
 
 %changelog
 * Tue Feb 24 2026 Pau Aliagas <linuxnow@gmail.com> - 0.4.9-1
-- Fix
-
-* Mon Feb 23 2026 Pau Aliagas <linuxnow@gmail.com> - 0.4.8-1
-- Bump to 0.4.8
-
-* Mon Feb 23 2026 Pau Aliagas <linuxnow@gmail.com> - 0.4.7-1
-- Fix
-
-* Mon Feb 23 2026 Pau Aliagas <linuxnow@gmail.com> - 0.4.6-1
-- Update homepage URL to xiboplayer.org and branded icon
-
-* Sun Feb 23 2026 Pau Aliagas <linuxnow@gmail.com> - 0.4.5-3
-- Update homepage URL to https://xiboplayer.org
-- Update application icon to branded play triangle
-
-* Mon Feb 23 2026 Pau Aliagas <linuxnow@gmail.com> - 0.4.5-1
-- Fix
-
-* Mon Feb 23 2026 Pau Aliagas <linuxnow@gmail.com> - 0.4.4-1
-- Bump to 0.4.4
-
-* Mon Feb 23 2026 Pau Aliagas <linuxnow@gmail.com> - 0.4.3-1
-- Bump to 0.4.3
-
-* Sat Feb 22 2026 Pau Aliagas <linuxnow@gmail.com> - 0.4.1-2
-- Fix @xiboplayer/pwa dependency range to pull 0.4.x from npm
-
-* Sun Feb 22 2026 Pau Aliagas <linuxnow@gmail.com> - 0.4.1-1
-- Fix timeline duration calculation, overlay alignment, and remaining-duration display
-
-* Sat Feb 21 2026 Pau Aliagas <linuxnow@gmail.com> - 0.4.0-1
-- Multi-display
-
-* Sat Feb 21 2026 Pau Aliagas <linuxnow@gmail.com> - 0.3.7-1
-- Bump to 0.3.7
-
-* Thu Feb 20 2026 Pau Aliagas <linuxnow@gmail.com> - 0.3.4-1
-- Bump to 0.3.4 (unified versioning across all packages)
-- Pick up SDK 0.3.4 with RSA key generation (@xiboplayer/crypto)
-- Pick up PWA 0.3.4 with crypto dependency
-
-* Thu Feb 20 2026 Pau Aliagas <linuxnow@gmail.com> - 0.3.1-1
-- Pick up @xiboplayer/pwa 0.3.2 with service worker refactor
-- Pick up SDK 0.3.0 (@xiboplayer/sw split out)
-
-* Wed Feb 19 2026 Pau Aliagas <linuxnow@gmail.com> - 0.3.0-1
-- Bump SDK dependencies to 0.3.0 (SW refactored into @xiboplayer/sw)
-
-* Tue Feb 18 2026 Pau Aliagas <linuxnow@gmail.com> - 0.2.0-1
-- Filter bogus libc.so/libdl/libpthread/librt auto-requires
-- Add Provides: bundled(electron) per Fedora Bundling guidelines
-- Conflict with xiboplayer-chromium (not xiboplayer-pwa)
-
-* Mon Feb 16 2026 Pau Aliagas <linuxnow@gmail.com> - 0.1.0-1
-- Initial RPM with Fedora FHS paths
-- Electron bundle in /usr/lib64/xiboplayer/
-- Systemd user service for auto-start
+- Initial development release
