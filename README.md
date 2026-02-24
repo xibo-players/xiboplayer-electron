@@ -144,6 +144,7 @@ journalctl --user -u xiboplayer-electron.service -f
 | `←` / `PageUp` | Go to previous layout |
 | `Space` | Pause / resume playback |
 | `R` | Revert to scheduled layout (when manually overridden) |
+| `S` | Open setup page (reconfigure CMS connection, requires CMS key) |
 
 ### System Tray Menu
 
@@ -257,6 +258,22 @@ The app requests minimal permissions:
 - Display management (fullscreen, prevent sleep)
 - Network access (HTTP server, XMDS communication)
 - File system access (config and cache storage)
+
+## Reconfiguring the Player
+
+To change CMS connection parameters (address, key, display name) on a running player, open the setup page from any browser on the same machine:
+
+```
+http://localhost:8765/player/setup.html
+```
+
+This works even when the player is in kiosk mode. To force a full re-registration (new display):
+
+```bash
+# Wipe all config and restart — shows setup screen
+rm -rf ~/.config/@xiboplayer/electron
+systemctl --user restart xiboplayer-electron.service
+```
 
 ## Troubleshooting
 
