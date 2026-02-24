@@ -79,6 +79,7 @@ redirects back to the setup screen automatically.
 xiboplayer-electron --dev              # Development mode (enables DevTools)
 xiboplayer-electron --no-kiosk         # Disable kiosk mode
 xiboplayer-electron --port=8080        # Custom Express server port
+xiboplayer-electron --instance=NAME    # Run as named instance (isolated config/data)
 xiboplayer-electron --cms-url=URL      # CMS URL
 xiboplayer-electron --cms-key=KEY      # CMS key
 xiboplayer-electron --display-name=NAME  # Display name
@@ -179,6 +180,50 @@ Right-click the system tray icon (or press Ctrl+Shift+F12) to access:
 - Configuration
 - Auto-start on Boot
 - Exit Player
+
+## Multiple Displays
+
+Run multiple independent player instances on the same machine using `--instance=NAME`. Each instance gets its own config, session data, and server port:
+
+```bash
+# Instance "lobby" — default port 8765
+xiboplayer-electron --instance=lobby
+
+# Instance "cafeteria" — port 8766
+xiboplayer-electron --instance=cafeteria --port=8766
+```
+
+Each instance uses isolated paths:
+
+| | Default (no instance) | `--instance=lobby` |
+|---|---|---|
+| **Config** | `~/.config/xiboplayer/electron/` | `~/.config/xiboplayer/electron-lobby/` |
+| **Session data** | `~/.local/share/xiboplayer/electron/` | `~/.local/share/xiboplayer/electron-lobby/` |
+
+### Setup
+
+1. Create a config for each instance:
+```bash
+mkdir -p ~/.config/xiboplayer/electron-lobby
+cat > ~/.config/xiboplayer/electron-lobby/config.json << 'EOF'
+{
+  "cmsUrl": "https://cms.example.com",
+  "cmsKey": "your-key",
+  "displayName": "Lobby Display",
+  "serverPort": 8765
+}
+EOF
+```
+
+2. Create a systemd service per instance:
+```bash
+cp ~/.config/systemd/user/xiboplayer-electron.service \
+   ~/.config/systemd/user/xiboplayer-lobby.service
+# Edit: ExecStart=/usr/bin/xiboplayer-electron --instance=lobby
+systemctl --user enable --now xiboplayer-lobby.service
+```
+
+Each instance registers as a separate display in the CMS.
 
 ## Building from Source
 

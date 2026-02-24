@@ -18,12 +18,17 @@ const fs = require('fs');
 const AutoLaunch = require('electron-auto-launch');
 const os = require('os');
 
+// Parse --instance=NAME early (before app paths are used)
+const instanceArg = process.argv.find(arg => arg.startsWith('--instance='));
+const instanceName = instanceArg ? instanceArg.split('=').slice(1).join('=') : '';
+const instanceSuffix = instanceName ? `electron-${instanceName}` : 'electron';
+
 // XDG-compliant paths: config in ~/.config, data in ~/.local/share
-// Config (config.json, preferences): ~/.config/xiboplayer/electron/
-app.setPath('userData', path.join(app.getPath('appData'), 'xiboplayer', 'electron'));
-// Session data (Cache, IndexedDB, Service Worker, cookies): ~/.local/share/xiboplayer/electron/
+// Config (config.json, preferences): ~/.config/xiboplayer/electron[-NAME]/
+app.setPath('userData', path.join(app.getPath('appData'), 'xiboplayer', instanceSuffix));
+// Session data (Cache, IndexedDB, Service Worker, cookies): ~/.local/share/xiboplayer/electron[-NAME]/
 const dataHome = process.env.XDG_DATA_HOME || path.join(os.homedir(), '.local', 'share');
-app.setPath('sessionData', path.join(dataHome, 'xiboplayer', 'electron'));
+app.setPath('sessionData', path.join(dataHome, 'xiboplayer', instanceSuffix));
 
 // GPU acceleration flags — must be set before app.whenReady()
 // Electron 40+ (Chromium 144) auto-detects Wayland via ozone-platform-hint=auto.
@@ -58,8 +63,8 @@ const CONFIG_DEFAULTS = {
 };
 
 const configDir = process.env.XDG_CONFIG_HOME || path.join(os.homedir(), '.config');
-const configFilePath = path.join(configDir, 'xiboplayer', 'electron', 'config.json');
-const pwaVersionPath = path.join(configDir, 'xiboplayer', 'electron', '.pwa-version');
+const configFilePath = path.join(configDir, 'xiboplayer', instanceSuffix, 'config.json');
+const pwaVersionPath = path.join(configDir, 'xiboplayer', instanceSuffix, '.pwa-version');
 
 // Load config: defaults ← config.json on disk
 let config = { ...CONFIG_DEFAULTS };
@@ -730,6 +735,7 @@ function setupIpcHandlers() {
  */
 app.whenReady().then(async () => {
   console.log(`[App] Starting Xibo Player v${APP_VERSION}`);
+  if (instanceName) console.log(`[App] Instance: ${instanceName}`);
   console.log(`[App] User data path: ${app.getPath('userData')}`);
   console.log(`[App] Development mode: ${isDev}`);
   console.log(`[App] Kiosk mode: ${!noKiosk}`);
