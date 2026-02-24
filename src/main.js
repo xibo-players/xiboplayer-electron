@@ -111,6 +111,17 @@ try {
   }
 }
 
+// No CMS URL after reading config.json + store → unconfigured.
+// Wipe stale session data so the PWA shows the setup screen
+// instead of booting from a ghost config left by a previous session.
+if (!store.get('cmsUrl')) {
+  const sessionDir = app.getPath('sessionData');
+  for (const dir of ['Local Storage', 'IndexedDB', 'Service Worker', 'Cache', 'Code Cache']) {
+    try { fs.rmSync(path.join(sessionDir, dir), { recursive: true, force: true }); } catch (_) {}
+  }
+  console.log('[Config] Unconfigured — cleared stale session data');
+}
+
 /**
  * Get the path to PWA dist files.
  * - Dev mode: uses ../xiboplayer-pwa/dist (sibling repo)
