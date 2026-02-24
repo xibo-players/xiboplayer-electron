@@ -613,8 +613,8 @@ function setupGlobalShortcuts() {
     });
   }
 
-  // Emergency exit with Ctrl+Shift+Q
-  globalShortcut.register('CommandOrControl+Shift+Q', () => {
+  // Emergency exit with Ctrl+Alt+Q (Ctrl+Shift+Q conflicts with GNOME/Ptyxis)
+  globalShortcut.register('CommandOrControl+Alt+Q', () => {
     console.log('[Shortcut] Emergency exit');
     app.isQuitting = true;
     app.quit();
