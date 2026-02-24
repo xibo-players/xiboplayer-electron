@@ -94,6 +94,24 @@ if (cliCmsUrl) {
   if (cliDisplayName) store.set('displayName', cliDisplayName);
 }
 
+// Read CMS config from config.json (same pattern as chromium kiosk)
+const configDir = process.env.XDG_CONFIG_HOME || path.join(require('os').homedir(), '.config');
+const configFilePath = path.join(configDir, 'xiboplayer', 'electron', 'config.json');
+try {
+  const fileConfig = JSON.parse(fs.readFileSync(configFilePath, 'utf8'));
+  if (fileConfig.cmsUrl && !store.get('cmsUrl')) {
+    // First boot: seed store from config file
+    store.set('cmsUrl', fileConfig.cmsUrl);
+    if (fileConfig.cmsKey) store.set('cmsKey', fileConfig.cmsKey);
+    if (fileConfig.displayName) store.set('displayName', fileConfig.displayName);
+    console.log(`[Config] Seeded from ${configFilePath}: ${fileConfig.cmsUrl}`);
+  }
+} catch (err) {
+  if (err.code !== 'ENOENT') {
+    console.warn(`[Config] Failed to read config.json: ${err.message}`);
+  }
+}
+
 /**
  * Get the path to PWA dist files.
  * - Dev mode: uses ../xiboplayer-pwa/dist (sibling repo)
