@@ -41,6 +41,9 @@ const APP_VERSION = '0.2.1';
 
 // Configuration
 const CONFIG_DEFAULTS = {
+  cmsAddress: '',
+  cmsKey: '',
+  displayName: '',
   cmsUrl: '',
   hardwareKey: '',
   serverPort: 8765,
@@ -83,6 +86,14 @@ const displayNameArg = process.argv.find(arg => arg.startsWith('--display-name='
 const cliCmsUrl = cmsUrlArg ? cmsUrlArg.split('=').slice(1).join('=') : null;
 const cliCmsKey = cmsKeyArg ? cmsKeyArg.split('=').slice(1).join('=') : null;
 const cliDisplayName = displayNameArg ? displayNameArg.split('=').slice(1).join('=') : null;
+
+// Persist CLI CMS args into the store so they survive restarts and
+// are available for server-side config injection via the proxy.
+if (cliCmsUrl) {
+  store.set('cmsAddress', cliCmsUrl);
+  if (cliCmsKey) store.set('cmsKey', cliCmsKey);
+  if (cliDisplayName) store.set('displayName', cliDisplayName);
+}
 
 /**
  * Get the path to PWA dist files.
@@ -140,8 +151,14 @@ async function createExpressServer() {
   console.log(`[Express] PWA path: ${pwaPath}`);
   console.log(`[Express] Starting server on port: ${serverPort}`);
 
+  // Build cmsConfig from store (populated by CLI args or config file edits)
+  const cmsAddress = store.get('cmsAddress', '');
+  const cmsKey = store.get('cmsKey', '');
+  const displayName = store.get('displayName', '');
+  const cmsConfig = cmsAddress ? { cmsAddress, cmsKey, displayName } : undefined;
+
   const { createProxyApp } = await import('@xiboplayer/proxy');
-  const expressApp = createProxyApp({ pwaPath, appVersion: APP_VERSION });
+  const expressApp = createProxyApp({ pwaPath, appVersion: APP_VERSION, cmsConfig });
 
   // Start server
   expressServer = expressApp.listen(serverPort, 'localhost', () => {
@@ -282,36 +299,9 @@ function createWindow() {
 
   console.log(`[Window] Loading URL: ${url}`);
 
-  // Inject CMS config into PWA localStorage if CLI args provided.
-  // Always overwrite when --cms-url is given (authoritative), but preserve
-  // any existing hardwareKey so the display doesn't re-register.
-  if (cliCmsUrl) {
-    mainWindow.webContents.once('did-finish-load', () => {
-      mainWindow.webContents.executeJavaScript(`
-        (function() {
-          let existing = {};
-          try { existing = JSON.parse(localStorage.getItem('xibo_config') || '{}'); } catch(e) {}
-          const config = {
-            cmsAddress: ${JSON.stringify(cliCmsUrl)},
-            cmsKey: ${JSON.stringify(cliCmsKey || '')},
-            displayName: ${JSON.stringify(cliDisplayName || 'Electron Player')},
-            hardwareKey: existing.hardwareKey || '',
-            xmrChannel: existing.xmrChannel || ''
-          };
-          const prev = localStorage.getItem('xibo_config');
-          localStorage.setItem('xibo_config', JSON.stringify(config));
-          if (!prev || JSON.parse(prev).cmsAddress !== config.cmsAddress) {
-            location.reload();
-          }
-          return config.cmsAddress;
-        })()
-      `).then((addr) => {
-        console.log(`[Config] CMS config set: ${addr}`);
-      }).catch(err => {
-        console.error('[Config] Failed to inject config:', err.message);
-      });
-    });
-  }
+  // CMS config injection is now handled server-side by @xiboplayer/proxy.
+  // The proxy injects a <script> into index.html that pre-seeds localStorage
+  // before the PWA loads, eliminating the race condition with did-finish-load.
 
   mainWindow.loadURL(url);
 
