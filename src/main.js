@@ -15,14 +15,14 @@
 const { app, BrowserWindow, ipcMain, powerSaveBlocker, globalShortcut, Menu, Tray, dialog, nativeImage, desktopCapturer } = require('electron');
 const path = require('path');
 const fs = require('fs');
-const Store = require('electron-store');
 const AutoLaunch = require('electron-auto-launch');
+const os = require('os');
 
 // XDG-compliant paths: config in ~/.config, data in ~/.local/share
-// Config (electron-store, preferences): ~/.config/xiboplayer/electron/
+// Config (config.json, preferences): ~/.config/xiboplayer/electron/
 app.setPath('userData', path.join(app.getPath('appData'), 'xiboplayer', 'electron'));
 // Session data (Cache, IndexedDB, Service Worker, cookies): ~/.local/share/xiboplayer/electron/
-const dataHome = process.env.XDG_DATA_HOME || path.join(require('os').homedir(), '.local', 'share');
+const dataHome = process.env.XDG_DATA_HOME || path.join(os.homedir(), '.local', 'share');
 app.setPath('sessionData', path.join(dataHome, 'xiboplayer', 'electron'));
 
 // GPU acceleration flags — must be set before app.whenReady()
@@ -39,12 +39,14 @@ app.commandLine.appendSwitch('enable-features',
 // Version
 const APP_VERSION = '0.2.1';
 
-// Configuration
+// ─── Configuration ──────────────────────────────────────────────────
+// Single config.json — sparse, user-provided overrides only.
+// Defaults live here in code; generated values (hardwareKey) stay in
+// PWA localStorage/IndexedDB.
 const CONFIG_DEFAULTS = {
   cmsUrl: '',
   cmsKey: '',
   displayName: '',
-  hardwareKey: '',
   serverPort: 8765,
   kioskMode: true,
   autoLaunch: false,
@@ -55,10 +57,46 @@ const CONFIG_DEFAULTS = {
   height: 1080,
 };
 
-const store = new Store({
-  defaults: CONFIG_DEFAULTS,
-  name: 'xibo-player-config',
-});
+const configDir = process.env.XDG_CONFIG_HOME || path.join(os.homedir(), '.config');
+const configFilePath = path.join(configDir, 'xiboplayer', 'electron', 'config.json');
+const pwaVersionPath = path.join(configDir, 'xiboplayer', 'electron', '.pwa-version');
+
+// Load config: defaults ← config.json on disk
+let config = { ...CONFIG_DEFAULTS };
+try {
+  const fileConfig = JSON.parse(fs.readFileSync(configFilePath, 'utf8'));
+  Object.assign(config, fileConfig);
+  console.log(`[Config] Loaded from ${configFilePath}: cmsUrl=${config.cmsUrl || '(empty)'}`);
+} catch (err) {
+  if (err.code !== 'ENOENT') {
+    console.warn(`[Config] Failed to read config.json: ${err.message}`);
+  }
+}
+
+/**
+ * Save updates to config.json — only persists keys already on disk
+ * plus the new keys. Never injects defaults or generated values.
+ */
+function saveConfig(updates) {
+  let existing = {};
+  try { existing = JSON.parse(fs.readFileSync(configFilePath, 'utf8')); } catch (_) {}
+  Object.assign(existing, updates);
+  // Ensure the config directory exists
+  fs.mkdirSync(path.dirname(configFilePath), { recursive: true });
+  fs.writeFileSync(configFilePath, JSON.stringify(existing, null, 2));
+  Object.assign(config, updates);
+}
+
+/** Read the cached PWA version from .pwa-version file */
+function readPwaVersion() {
+  try { return fs.readFileSync(pwaVersionPath, 'utf8').trim(); } catch (_) { return ''; }
+}
+
+/** Write the PWA version to .pwa-version file */
+function writePwaVersion(version) {
+  fs.mkdirSync(path.dirname(pwaVersionPath), { recursive: true });
+  fs.writeFileSync(pwaVersionPath, version);
+}
 
 // Auto-launch configuration
 const autoLauncher = new AutoLaunch({
@@ -79,42 +117,18 @@ const portArg = process.argv.find(arg => arg.startsWith('--port='));
 const cliPort = portArg ? parseInt(portArg.split('=')[1], 10) : null;
 
 // Parse --cms-url=URL and --cms-key=KEY for auto-config injection
+// CLI args are non-persistent — merged into in-memory config only.
 const cmsUrlArg = process.argv.find(arg => arg.startsWith('--cms-url='));
 const cmsKeyArg = process.argv.find(arg => arg.startsWith('--cms-key='));
 const displayNameArg = process.argv.find(arg => arg.startsWith('--display-name='));
-const cliCmsUrl = cmsUrlArg ? cmsUrlArg.split('=').slice(1).join('=') : null;
-const cliCmsKey = cmsKeyArg ? cmsKeyArg.split('=').slice(1).join('=') : null;
-const cliDisplayName = displayNameArg ? displayNameArg.split('=').slice(1).join('=') : null;
+if (cmsUrlArg) config.cmsUrl = cmsUrlArg.split('=').slice(1).join('=');
+if (cmsKeyArg) config.cmsKey = cmsKeyArg.split('=').slice(1).join('=');
+if (displayNameArg) config.displayName = displayNameArg.split('=').slice(1).join('=');
 
-// Persist CLI CMS args into the store so they survive restarts and
-// are available for server-side config injection via the proxy.
-if (cliCmsUrl) {
-  store.set('cmsUrl', cliCmsUrl);
-  if (cliCmsKey) store.set('cmsKey', cliCmsKey);
-  if (cliDisplayName) store.set('displayName', cliDisplayName);
-}
-
-// Read CMS config from config.json (master config file — always wins over store)
-const os = require('os');
-const configDir = process.env.XDG_CONFIG_HOME || path.join(os.homedir(), '.config');
-const configFilePath = path.join(configDir, 'xiboplayer', 'electron', 'config.json');
-
-try {
-  const fileConfig = JSON.parse(fs.readFileSync(configFilePath, 'utf8'));
-  if (fileConfig.cmsUrl) store.set('cmsUrl', fileConfig.cmsUrl);
-  if (fileConfig.cmsKey) store.set('cmsKey', fileConfig.cmsKey);
-  if (fileConfig.displayName) store.set('displayName', fileConfig.displayName);
-  console.log(`[Config] Loaded from ${configFilePath}: ${fileConfig.cmsUrl}`);
-} catch (err) {
-  if (err.code !== 'ENOENT') {
-    console.warn(`[Config] Failed to read config.json: ${err.message}`);
-  }
-}
-
-// No CMS URL after reading config.json + store → unconfigured.
+// No CMS URL → unconfigured.
 // Wipe stale session data so the PWA shows the setup screen
 // instead of booting from a ghost config left by a previous session.
-if (!store.get('cmsUrl')) {
+if (!config.cmsUrl) {
   const sessionDir = app.getPath('sessionData');
   for (const dir of ['Local Storage', 'IndexedDB', 'Service Worker', 'Cache', 'Code Cache']) {
     try { fs.rmSync(path.join(sessionDir, dir), { recursive: true, force: true }); } catch (_) {}
@@ -138,7 +152,7 @@ function getPwaPath() {
 /**
  * Clear Service Worker registrations when the bundled PWA version changes.
  * Reads version from the PWA's package.json and compares with the stored
- * version in electron-store.  On mismatch, wipes SW + caches so the new
+ * version in .pwa-version file.  On mismatch, wipes SW + caches so the new
  * build starts clean (no stale content-hashed assets).
  */
 async function clearStaleServiceWorker() {
@@ -146,7 +160,7 @@ async function clearStaleServiceWorker() {
     const pwaPath = getPwaPath();
     const pkgPath = path.join(pwaPath, '../package.json');
     const pwaVersion = JSON.parse(fs.readFileSync(pkgPath, 'utf8')).version;
-    const lastVersion = store.get('_pwaVersion', '');
+    const lastVersion = readPwaVersion();
 
     if (lastVersion && lastVersion !== pwaVersion) {
       console.log(`[SW-Clean] PWA version changed: ${lastVersion} → ${pwaVersion}, clearing session data`);
@@ -161,7 +175,7 @@ async function clearStaleServiceWorker() {
     } else if (!lastVersion) {
       console.log(`[SW-Clean] First run, recording PWA version ${pwaVersion}`);
     }
-    store.set('_pwaVersion', pwaVersion);
+    writePwaVersion(pwaVersion);
   } catch (err) {
     console.warn('[SW-Clean] Version check failed (non-fatal):', err.message);
   }
@@ -172,16 +186,13 @@ async function clearStaleServiceWorker() {
  * Uses @xiboplayer/proxy for CORS proxy routes and PWA static serving.
  */
 async function createExpressServer() {
-  const serverPort = cliPort || store.get('serverPort', CONFIG_DEFAULTS.serverPort);
+  const serverPort = cliPort || config.serverPort;
   const pwaPath = getPwaPath();
 
   console.log(`[Express] PWA path: ${pwaPath}`);
   console.log(`[Express] Starting server on port: ${serverPort}`);
 
-  // Build cmsConfig from store (populated by CLI args or config file edits)
-  const cmsUrl = store.get('cmsUrl', '');
-  const cmsKey = store.get('cmsKey', '');
-  const displayName = store.get('displayName', '');
+  const { cmsUrl, cmsKey, displayName } = config;
   const cmsConfig = cmsUrl ? { cmsUrl, cmsKey, displayName } : undefined;
 
   const { createProxyApp } = await import('@xiboplayer/proxy');
@@ -212,10 +223,9 @@ async function createExpressServer() {
  * Create the main browser window with kiosk mode settings
  */
 function createWindow() {
-  const kioskMode = noKiosk ? false : store.get('kioskMode', CONFIG_DEFAULTS.kioskMode);
-  const fullscreen = noKiosk ? false : store.get('fullscreen', CONFIG_DEFAULTS.fullscreen);
-  const width = store.get('width', CONFIG_DEFAULTS.width);
-  const height = store.get('height', CONFIG_DEFAULTS.height);
+  const kioskMode = noKiosk ? false : config.kioskMode;
+  const fullscreen = noKiosk ? false : config.fullscreen;
+  const { width, height } = config;
 
   console.log(`[Window] Creating window (kiosk: ${kioskMode}, fullscreen: ${fullscreen}, dev: ${isDev})`);
 
@@ -320,7 +330,7 @@ function createWindow() {
 
   // Load PWA from local server at /player/
   // In dev mode, enable DEBUG logging via URL param (logger defaults to WARNING)
-  const serverPort = cliPort || store.get('serverPort', CONFIG_DEFAULTS.serverPort);
+  const serverPort = cliPort || config.serverPort;
   const logParam = isDev ? '?logLevel=DEBUG' : '';
   const url = `http://localhost:${serverPort}/player/${logParam}`;
 
@@ -337,7 +347,7 @@ function createWindow() {
     mainWindow.show();
 
     // Hide mouse cursor after inactivity (digital signage mode)
-    if (store.get('hideMouseCursor', CONFIG_DEFAULTS.hideMouseCursor)) {
+    if (config.hideMouseCursor) {
       setupCursorHiding();
     }
   });
@@ -359,7 +369,7 @@ function createWindow() {
   // Allow navigation within the local server (including setup.html, index.html)
   // Block navigation to external URLs
   mainWindow.webContents.on('will-navigate', (event, navUrl) => {
-    const serverPort = cliPort || store.get('serverPort', CONFIG_DEFAULTS.serverPort);
+    const serverPort = cliPort || config.serverPort;
     const allowedOrigin = `http://localhost:${serverPort}`;
 
     if (!navUrl.startsWith(allowedOrigin)) {
@@ -453,7 +463,7 @@ function setupCursorHiding() {
  * Prevent system display from sleeping (digital signage must stay on)
  */
 function preventSystemSleep() {
-  if (store.get('preventSleep', CONFIG_DEFAULTS.preventSleep)) {
+  if (config.preventSleep) {
     powerSaveBlockerId = powerSaveBlocker.start('prevent-display-sleep');
     console.log(`[PowerSaver] Display sleep prevented (ID: ${powerSaveBlockerId})`);
   }
@@ -523,7 +533,7 @@ function createSystemTray() {
     {
       label: 'Auto-start on Boot',
       type: 'checkbox',
-      checked: store.get('autoLaunch', false),
+      checked: config.autoLaunch,
       click: (menuItem) => {
         toggleAutoLaunch(menuItem.checked);
       },
@@ -549,11 +559,11 @@ async function toggleAutoLaunch(enable) {
   try {
     if (enable) {
       await autoLauncher.enable();
-      store.set('autoLaunch', true);
+      saveConfig({ autoLaunch: true });
       console.log('[AutoLaunch] Enabled');
     } else {
       await autoLauncher.disable();
-      store.set('autoLaunch', false);
+      saveConfig({ autoLaunch: false });
       console.log('[AutoLaunch] Disabled');
     }
   } catch (error) {
@@ -565,25 +575,17 @@ async function toggleAutoLaunch(enable) {
  * Show configuration dialog
  */
 function showConfigDialog() {
-  const config = {
-    cmsUrl: store.get('cmsUrl', ''),
-    hardwareKey: store.get('hardwareKey', ''),
-    serverPort: store.get('serverPort', CONFIG_DEFAULTS.serverPort),
-    kioskMode: store.get('kioskMode', CONFIG_DEFAULTS.kioskMode),
-  };
-
   dialog.showMessageBox(mainWindow, {
     type: 'info',
     title: 'Configuration',
     message: 'Xibo Player Configuration',
     detail: `CMS URL: ${config.cmsUrl || 'Not set (configured in PWA setup)'}
-Hardware Key: ${config.hardwareKey || 'Auto-generated by PWA'}
 Server Port: ${config.serverPort}
 Kiosk Mode: ${config.kioskMode ? 'Enabled' : 'Disabled'}
 Version: ${APP_VERSION}
 
 Configuration is managed through the PWA setup page.
-To reconfigure, clear localStorage in DevTools.
+Config file: ${configFilePath}
 
 User data: ${app.getPath('userData')}`,
     buttons: ['OK', 'Open Config Folder'],
@@ -638,19 +640,22 @@ function setupIpcHandlers() {
   // Get Electron-side configuration
   ipcMain.handle('get-config', () => {
     return {
-      cmsUrl: store.get('cmsUrl', ''),
-      hardwareKey: store.get('hardwareKey', ''),
-      serverPort: store.get('serverPort', CONFIG_DEFAULTS.serverPort),
+      cmsUrl: config.cmsUrl,
+      serverPort: config.serverPort,
     };
   });
 
-  // Set Electron-side configuration
-  ipcMain.handle('set-config', (event, config) => {
-    if (config.cmsUrl !== undefined) store.set('cmsUrl', config.cmsUrl);
-    if (config.hardwareKey !== undefined) store.set('hardwareKey', config.hardwareKey);
-    if (config.serverPort !== undefined) store.set('serverPort', config.serverPort);
-
-    console.log('[Config] Configuration updated:', config);
+  // Set Electron-side configuration (persists to config.json)
+  ipcMain.handle('set-config', (_event, updates) => {
+    const allowed = ['cmsUrl', 'cmsKey', 'displayName', 'serverPort'];
+    const filtered = {};
+    for (const key of allowed) {
+      if (updates[key] !== undefined) filtered[key] = updates[key];
+    }
+    if (Object.keys(filtered).length > 0) {
+      saveConfig(filtered);
+      console.log('[Config] Configuration updated:', filtered);
+    }
     return true;
   });
 
@@ -751,7 +756,7 @@ app.whenReady().then(async () => {
   setupIpcHandlers();
 
   // Setup auto-launch if enabled
-  if (store.get('autoLaunch', false)) {
+  if (config.autoLaunch) {
     try {
       await autoLauncher.enable();
     } catch (err) {
