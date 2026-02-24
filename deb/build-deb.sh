@@ -4,7 +4,7 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ELECTRON_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
-VERSION="${1:-0.5.0}"
+VERSION="${1:-0.5.1}"
 NAME="xiboplayer-electron"
 
 # Detect architecture
