@@ -94,18 +94,17 @@ if (cliCmsUrl) {
   if (cliDisplayName) store.set('displayName', cliDisplayName);
 }
 
-// Read CMS config from config.json (same pattern as chromium kiosk)
-const configDir = process.env.XDG_CONFIG_HOME || path.join(require('os').homedir(), '.config');
+// Read CMS config from config.json (master config file — always wins over store)
+const os = require('os');
+const configDir = process.env.XDG_CONFIG_HOME || path.join(os.homedir(), '.config');
 const configFilePath = path.join(configDir, 'xiboplayer', 'electron', 'config.json');
+
 try {
   const fileConfig = JSON.parse(fs.readFileSync(configFilePath, 'utf8'));
-  if (fileConfig.cmsUrl && !store.get('cmsUrl')) {
-    // First boot: seed store from config file
-    store.set('cmsUrl', fileConfig.cmsUrl);
-    if (fileConfig.cmsKey) store.set('cmsKey', fileConfig.cmsKey);
-    if (fileConfig.displayName) store.set('displayName', fileConfig.displayName);
-    console.log(`[Config] Seeded from ${configFilePath}: ${fileConfig.cmsUrl}`);
-  }
+  if (fileConfig.cmsUrl) store.set('cmsUrl', fileConfig.cmsUrl);
+  if (fileConfig.cmsKey) store.set('cmsKey', fileConfig.cmsKey);
+  if (fileConfig.displayName) store.set('displayName', fileConfig.displayName);
+  console.log(`[Config] Loaded from ${configFilePath}: ${fileConfig.cmsUrl}`);
 } catch (err) {
   if (err.code !== 'ENOENT') {
     console.warn(`[Config] Failed to read config.json: ${err.message}`);
@@ -175,7 +174,7 @@ async function createExpressServer() {
   const cmsConfig = cmsUrl ? { cmsUrl, cmsKey, displayName } : undefined;
 
   const { createProxyApp } = await import('@xiboplayer/proxy');
-  const expressApp = createProxyApp({ pwaPath, appVersion: APP_VERSION, cmsConfig });
+  const expressApp = createProxyApp({ pwaPath, appVersion: APP_VERSION, cmsConfig, configFilePath });
 
   // Start server
   expressServer = expressApp.listen(serverPort, 'localhost', () => {
@@ -613,8 +612,8 @@ function setupGlobalShortcuts() {
     });
   }
 
-  // Emergency exit with Ctrl+Alt+Q (Ctrl+Shift+Q conflicts with GNOME/Ptyxis)
-  globalShortcut.register('CommandOrControl+Alt+Q', () => {
+  // Emergency exit with Ctrl+Shift+Q
+  globalShortcut.register('CommandOrControl+Shift+Q', () => {
     console.log('[Shortcut] Emergency exit');
     app.isQuitting = true;
     app.quit();
