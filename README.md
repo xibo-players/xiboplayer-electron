@@ -73,6 +73,22 @@ a setup screen where you enter the CMS URL, key, and display name in the
 browser. If registration fails (wrong URL, CMS unreachable), the player
 redirects back to the setup screen automatically.
 
+### Auto-authorize via CMS API (optional)
+
+By default, new displays must be manually authorized by a CMS administrator. To skip this step, add OAuth2 API credentials to `config.json` — see the [PWA README](https://github.com/xibo-players/xiboplayer-pwa#auto-authorize-via-cms-api-optional) for full setup instructions including CMS Application configuration:
+
+```json
+{
+  "cmsUrl": "https://your-cms.example.com",
+  "cmsKey": "your-cms-key",
+  "displayName": "Lobby Display",
+  "apiClientId": "your-client-id",
+  "apiClientSecret": "your-client-secret"
+}
+```
+
+You can also enter the API credentials interactively in the setup page under "Auto-authorize via API".
+
 ### Command-line arguments
 
 ```bash
