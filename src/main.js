@@ -143,14 +143,14 @@ if (!config.cmsUrl) {
 
 /**
  * Get the path to PWA dist files.
- * - Dev mode: uses ../xiboplayer-pwa/dist (sibling repo)
- * - Production: uses @xiboplayer/pwa/dist from node_modules (bundled by electron-builder)
+ * - Dev (sibling repo exists): ../xiboplayer-pwa/dist
+ * - Installed / production: @xiboplayer/pwa/dist from node_modules (inside asar)
  */
 function getPwaPath() {
   if (isDev) {
-    return path.join(__dirname, '../../xiboplayer-pwa/dist');
+    const devPath = path.join(__dirname, '../../xiboplayer-pwa/dist');
+    if (fs.existsSync(devPath)) return devPath;
   }
-  // In production, resolve from node_modules inside the asar/unpacked app
   return path.join(__dirname, '../node_modules/@xiboplayer/pwa/dist');
 }
 
