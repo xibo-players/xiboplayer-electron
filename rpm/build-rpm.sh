@@ -4,7 +4,7 @@ set -e
 
 SPEC_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ELECTRON_DIR="$(cd "$SPEC_DIR/.." && pwd)"
-VERSION="${1:-0.5.11}"
+VERSION="${1:-0.5.12}"
 NAME="xiboplayer-electron"
 
 echo "==> Building $NAME RPM v$VERSION"
