@@ -201,7 +201,8 @@ async function createExpressServer() {
   const cmsConfig = cmsUrl ? { cmsUrl, cmsKey, displayName } : undefined;
 
   const { createProxyApp } = await import('@xiboplayer/proxy');
-  const expressApp = createProxyApp({ pwaPath, appVersion: APP_VERSION, cmsConfig, configFilePath });
+  const dataDir = app.getPath('sessionData');
+  const expressApp = createProxyApp({ pwaPath, appVersion: APP_VERSION, cmsConfig, configFilePath, dataDir });
 
   // Start server
   expressServer = expressApp.listen(serverPort, 'localhost', () => {
