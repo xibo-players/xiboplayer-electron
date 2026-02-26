@@ -129,6 +129,9 @@ if [ $1 -eq 0 ] ; then
 fi
 
 %changelog
+* Fri Feb 27 2026 Pau Aliagas <linuxnow@gmail.com> - 0.5.12-1
+- fix:
+
 * Fri Feb 27 2026 Pau Aliagas <linuxnow@gmail.com> - 0.5.11-1
 - fix:
 
