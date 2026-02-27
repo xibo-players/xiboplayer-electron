@@ -204,10 +204,13 @@ async function createExpressServer() {
 
   const { cmsUrl, cmsKey, displayName } = config;
   const cmsConfig = cmsUrl ? { cmsUrl, cmsKey, displayName } : undefined;
+  const playerConfig = {};
+  if (config.controls) playerConfig.controls = config.controls;
+  if (config.transport) playerConfig.transport = config.transport;
 
   const { createProxyApp } = await import('@xiboplayer/proxy');
   const dataDir = app.getPath('sessionData');
-  const expressApp = createProxyApp({ pwaPath, appVersion: APP_VERSION, cmsConfig, configFilePath, dataDir });
+  const expressApp = createProxyApp({ pwaPath, appVersion: APP_VERSION, cmsConfig, configFilePath, dataDir, playerConfig });
 
   // Start server
   expressServer = expressApp.listen(serverPort, 'localhost', () => {
