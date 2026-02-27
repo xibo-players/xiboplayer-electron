@@ -71,14 +71,26 @@ const configDir = process.env.XDG_CONFIG_HOME || path.join(os.homedir(), '.confi
 const configFilePath = path.join(configDir, 'xiboplayer', instanceSuffix, 'config.json');
 const pwaVersionPath = path.join(configDir, 'xiboplayer', instanceSuffix, '.pwa-version');
 
-// Load config: defaults ← config.json on disk
+// Load config: defaults ← system template ← config.json on disk
+const SYSTEM_CONFIG = '/usr/share/xiboplayer-electron/config.json';
 let config = { ...CONFIG_DEFAULTS };
 try {
   const fileConfig = JSON.parse(fs.readFileSync(configFilePath, 'utf8'));
   Object.assign(config, fileConfig);
   console.log(`[Config] Loaded from ${configFilePath}: cmsUrl=${config.cmsUrl || '(empty)'}`);
 } catch (err) {
-  if (err.code !== 'ENOENT') {
+  if (err.code === 'ENOENT') {
+    // First run — copy system default config if available (RPM/DEB install)
+    try {
+      const sysConfig = fs.readFileSync(SYSTEM_CONFIG, 'utf8');
+      fs.mkdirSync(path.dirname(configFilePath), { recursive: true });
+      fs.writeFileSync(configFilePath, sysConfig);
+      Object.assign(config, JSON.parse(sysConfig));
+      console.log(`[Config] Created ${configFilePath} from ${SYSTEM_CONFIG}`);
+    } catch (_) {
+      // No system config — running from source or dev; use defaults
+    }
+  } else {
     console.warn(`[Config] Failed to read config.json: ${err.message}`);
   }
 }

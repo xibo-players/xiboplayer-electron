@@ -69,6 +69,16 @@ Keywords=signage;digital;kiosk;xibo;
 StartupWMClass=xiboplayer
 DESKTOP
 
+# Minimal config (copied to ~/.config/xiboplayer/ on first run)
+mkdir -p "$DEB_DIR/usr/share/$NAME"
+install -m644 "$ELECTRON_DIR/config.json" "$DEB_DIR/usr/share/$NAME/config.json"
+
+# Full config reference + documentation
+mkdir -p "$DEB_DIR/usr/share/doc/$NAME"
+cp "$ELECTRON_DIR/config.json.example" "$DEB_DIR/usr/share/doc/$NAME/"
+cp "$ELECTRON_DIR/CONFIG.md" "$DEB_DIR/usr/share/doc/$NAME/"
+cp "$ELECTRON_DIR/README.md" "$DEB_DIR/usr/share/doc/$NAME/"
+
 # Copy icon if available
 if [ -f "$DEB_DIR/usr/lib/xiboplayer/resources/app.asar.unpacked/resources/pwa/favicon.png" ]; then
     cp "$DEB_DIR/usr/lib/xiboplayer/resources/app.asar.unpacked/resources/pwa/favicon.png" \
