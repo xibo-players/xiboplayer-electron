@@ -28,6 +28,9 @@ Configuration file: `~/.config/xiboplayer/electron/config.json`
   // CMS transport: "auto" (default) or "xmds" (force SOAP for unpatched Xibo CMS)
   "transport": "auto",
 
+  // Google Geolocation API key (optional, improves location accuracy)
+  "googleGeoApiKey": "",
+
   // Keyboard and mouse controls
   "controls": {
     "keyboard": {
@@ -51,6 +54,22 @@ Configuration file: `~/.config/xiboplayer/electron/config.json`
 | `"xmds"` | Force SOAP/XMDS transport — use this for unpatched Xibo CMS without REST API |
 
 Omitting `transport` or setting it to any value other than `"xmds"` uses auto-detection.
+
+## Google Geolocation API Key
+
+Optional. Improves location accuracy from ~5 km (IP-based fallback) to ~50 m (Google API).
+
+```json
+{
+  "googleGeoApiKey": "AIzaSy..."
+}
+```
+
+The key is passed to the SDK via `playerConfig`. Without it, the player falls back to free IP-based geolocation providers — no key required.
+
+## Media Capture
+
+Webcam and microphone access is auto-approved via Electron's `setPermissionRequestHandler` (the `media` permission). No configuration needed.
 
 ## Controls
 

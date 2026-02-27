@@ -207,6 +207,7 @@ async function createExpressServer() {
   const playerConfig = {};
   if (config.controls) playerConfig.controls = config.controls;
   if (config.transport) playerConfig.transport = config.transport;
+  if (config.googleGeoApiKey) playerConfig.googleGeoApiKey = config.googleGeoApiKey;
 
   const { createProxyApp } = await import('@xiboplayer/proxy');
   const dataDir = app.getPath('sessionData');
