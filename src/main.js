@@ -41,6 +41,11 @@ app.commandLine.appendSwitch('enable-features',
   'VaapiVideoDecoder,VaapiVideoEncoder,VaapiOnNvidiaGPUs,' +
   'AcceleratedVideoEncoder,CanvasOopRasterization');
 
+// Prevent GPU crash and renderer freeze when screen is locked/off
+app.commandLine.appendSwitch('disable-gpu-watchdog');
+app.commandLine.appendSwitch('disable-background-timer-throttling');
+app.commandLine.appendSwitch('disable-renderer-backgrounding');
+
 // Version
 const APP_VERSION = '0.2.1';
 
