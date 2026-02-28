@@ -158,16 +158,15 @@ if (!config.cmsUrl) {
   console.log('[Config] Unconfigured — cleared stale session data');
 }
 
+// Parse --pwa-path=/path/to/dist for local development builds
+const pwaPathArg = process.argv.find(arg => arg.startsWith('--pwa-path='));
+
 /**
  * Get the path to PWA dist files.
- * - Dev (sibling repo exists): ../xiboplayer-pwa/dist
- * - Installed / production: @xiboplayer/pwa/dist from node_modules (inside asar)
+ * Priority: --pwa-path CLI arg > node_modules (production / installed)
  */
 function getPwaPath() {
-  if (isDev) {
-    const devPath = path.join(__dirname, '../../xiboplayer-pwa/dist');
-    if (fs.existsSync(devPath)) return devPath;
-  }
+  if (pwaPathArg) return pwaPathArg.split('=').slice(1).join('=');
   return path.join(__dirname, '../node_modules/@xiboplayer/pwa/dist');
 }
 
