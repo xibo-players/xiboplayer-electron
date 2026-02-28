@@ -64,6 +64,7 @@ const CONFIG_DEFAULTS = {
   hideMouseCursor: true,
   preventSleep: true,
   logLevel: '',
+  relaxSslCerts: true,
   width: 1920,
   height: 1080,
 };
@@ -347,37 +348,41 @@ function createWindow() {
 
   // ─── Accept invalid certificates for media/stream URLs ──────────────
   // Digital signage often loads HLS streams or media from servers with
-  // self-signed or expired certificates. Accept these for non-CMS URLs
-  // (CMS API calls must still use valid certificates for security).
-  const cmsHost = config.cmsUrl ? new URL(config.cmsUrl).host : null;
+  // self-signed or expired certificates. Enabled by default (relaxSslCerts: true)
+  // because self-signed certs on media streams are common in signage deployments.
+  // Set to false in config.json to enforce strict SSL for all URLs.
+  // CMS API calls always require valid certificates regardless of this setting.
+  if (config.relaxSslCerts) {
+    const cmsHost = config.cmsUrl ? new URL(config.cmsUrl).host : null;
 
-  app.on('certificate-error', (event, _webContents, url, error, _certificate, callback) => {
-    try {
-      const urlHost = new URL(url).host;
-      // Never bypass cert errors for CMS or localhost — those must be valid
-      if (cmsHost && urlHost === cmsHost) {
+    app.on('certificate-error', (event, _webContents, url, error, _certificate, callback) => {
+      try {
+        const urlHost = new URL(url).host;
+        // Never bypass cert errors for CMS or localhost — those must be valid
+        if (cmsHost && urlHost === cmsHost) {
+          callback(false);
+          return;
+        }
+        if (urlHost === 'localhost' || urlHost.startsWith('127.')) {
+          callback(false);
+          return;
+        }
+        // Accept invalid certs for media/stream URLs and warn
+        event.preventDefault();
+        console.warn(`[Security] Accepted invalid certificate for media URL: ${url} (${error})`);
+        callback(true);
+
+        // Notify renderer to show warning in overlay
+        if (mainWindow && !mainWindow.isDestroyed()) {
+          mainWindow.webContents.send('cert-warning', { url, host: urlHost, error });
+        }
+      } catch {
         callback(false);
-        return;
       }
-      if (urlHost === 'localhost' || urlHost.startsWith('127.')) {
-        callback(false);
-        return;
-      }
-      // Accept invalid certs for media/stream URLs and warn
-      event.preventDefault();
-      console.warn(`[Security] Accepted invalid certificate for media URL: ${url} (${error})`);
-      callback(true);
+    });
 
-      // Notify renderer to show warning in overlay
-      if (mainWindow && !mainWindow.isDestroyed()) {
-        mainWindow.webContents.send('cert-warning', { url, host: urlHost, error });
-      }
-    } catch {
-      callback(false);
-    }
-  });
-
-  console.log('[Session] Certificate handling configured (media streams: permissive, CMS: strict)');
+    console.log('[Session] Certificate handling configured (relaxSslCerts: media streams permissive, CMS: strict)');
+  }
 
   // ─── Forward Service Worker console logs to main process ────────────
   // SW logs don't appear in webContents.on('console-message'). This
@@ -476,6 +481,8 @@ function createWindow() {
     }
   });
 
+
+
   // Handle renderer crashes
   mainWindow.webContents.on('render-process-gone', (event, details) => {
     console.error('[Window] Render process gone:', details.reason, details.exitCode);
@@ -533,6 +540,7 @@ function setupCursorHiding() {
         }
       });
     `).catch(() => {});
+
   });
 
   ipcMain.on('reset-cursor-timeout', resetCursorTimeout);
