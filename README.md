@@ -121,7 +121,8 @@ CLI args are persisted to the internal store and survive restarts.
 
 Default log level is **WARNING** (production-safe). The `--dev` flag automatically
 sets DEBUG logging. Override via URL parameter `?logLevel=DEBUG`, localStorage, or
-CMS display settings.
+CMS display settings. Log levels only affect logging verbosity — debug overlays
+are controlled separately via `controls.keyboard.debugOverlays` in `config.json`.
 
 | Level | Use case |
 |-------|----------|
@@ -174,18 +175,21 @@ journalctl --user -u xiboplayer-electron.service -f
 - **Ctrl+Shift+R** - Reload player
 - **Ctrl+Shift+I** - Toggle DevTools (dev mode only)
 
-**PWA player shortcuts (work inside Electron):**
+**PWA player shortcuts** (must be enabled in `config.json` `controls` section — all disabled by default):
 
-| Key | Action |
-|-----|--------|
-| `T` | Toggle timeline overlay — shows upcoming scheduled layouts with conflict indicators |
-| `D` | Toggle download overlay — shows media download progress |
-| `V` | Toggle video controls — show/hide native browser controls on all videos |
-| `→` / `PageDown` | Skip to next layout |
-| `←` / `PageUp` | Go to previous layout |
-| `Space` | Pause / resume playback |
-| `R` | Revert to scheduled layout (when manually overridden) |
-| `S` | Open setup page (reconfigure CMS connection, requires CMS key) |
+| Key | Group | Action |
+|-----|-------|--------|
+| `D` | `debugOverlays` | Toggle download progress overlay |
+| `T` | `debugOverlays` | Toggle timeline overlay (click-to-skip supported) |
+| `S` | `setupKey` | Toggle CMS setup screen |
+| `V` | `videoControls` | Toggle native `<video>` controls |
+| `→` / `PageDown` | `playbackControl` | Skip to next layout |
+| `←` / `PageUp` | `playbackControl` | Skip to previous layout |
+| `Space` | `playbackControl` | Pause / resume playback |
+| `R` | `playbackControl` | Revert to scheduled layout |
+| Media keys | `playbackControl` | Next/prev/pause/play (MediaSession API) |
+
+See [CONFIG.md](CONFIG.md) for enabling specific control groups.
 
 ### System Tray Menu
 
