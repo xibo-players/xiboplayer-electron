@@ -221,7 +221,16 @@ async function createExpressServer() {
 
   const { createProxyApp } = await import('@xiboplayer/proxy');
   const dataDir = app.getPath('sessionData');
-  const expressApp = createProxyApp({ pwaPath, appVersion: APP_VERSION, cmsConfig, configFilePath, dataDir, playerConfig });
+
+  // Forward proxy logs to renderer DevTools via IPC.
+  // The sink receives { level, name, args } from @xiboplayer/utils logger.
+  const onLog = ({ level, name, args }) => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('proxy-log', { level, name, args });
+    }
+  };
+
+  const expressApp = createProxyApp({ pwaPath, appVersion: APP_VERSION, cmsConfig, configFilePath, dataDir, playerConfig, onLog });
 
   // Start server
   expressServer = expressApp.listen(serverPort, 'localhost', () => {

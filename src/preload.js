@@ -45,5 +45,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
   restartApp: () => ipcRenderer.send('restart-app'),
 });
 
+// Forward proxy logs from main process → renderer DevTools console
+ipcRenderer.on('proxy-log', (_event, { level, name, args }) => {
+  const prefix = `[${name}]`;
+  const fn = level === 'error' ? console.error : level === 'warn' ? console.warn : console.log;
+  fn(prefix, ...args);
+});
+
 // Log that preload script loaded
 console.log('[Preload] Preload script initialized (Electron shell)');
