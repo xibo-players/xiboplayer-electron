@@ -213,12 +213,20 @@ async function createExpressServer() {
   console.log(`[Express] PWA path: ${pwaPath}`);
   console.log(`[Express] Starting server on port: ${serverPort}`);
 
-  const { cmsUrl, cmsKey, displayName } = config;
-  const cmsConfig = cmsUrl ? { cmsUrl, cmsKey, displayName } : undefined;
-  const playerConfig = {};
-  if (config.controls) playerConfig.controls = config.controls;
-  if (config.transport) playerConfig.transport = config.transport;
-  if (config.googleGeoApiKey) playerConfig.googleGeoApiKey = config.googleGeoApiKey;
+  // Pass all config fields to the PWA except Electron-only window settings.
+  // This ensures new config.json fields (e.g. logLevel) automatically reach
+  // the PWA's localStorage without needing code changes here.
+  const ELECTRON_ONLY_KEYS = new Set([
+    'serverPort', 'kioskMode', 'autoLaunch', 'fullscreen',
+    'hideMouseCursor', 'preventSleep', 'width', 'height',
+  ]);
+
+  const pwaConfig = {};
+  for (const [key, value] of Object.entries(config)) {
+    if (!ELECTRON_ONLY_KEYS.has(key)) {
+      pwaConfig[key] = value;
+    }
+  }
 
   const { createProxyApp } = await import('@xiboplayer/proxy');
   const dataDir = app.getPath('sessionData');
@@ -231,7 +239,11 @@ async function createExpressServer() {
     }
   };
 
-  const expressApp = createProxyApp({ pwaPath, appVersion: APP_VERSION, cmsConfig, configFilePath, dataDir, playerConfig, onLog });
+  const expressApp = createProxyApp({
+    pwaPath, appVersion: APP_VERSION,
+    pwaConfig: config.cmsUrl ? pwaConfig : undefined,
+    configFilePath, dataDir, onLog,
+  });
 
   // Start server
   expressServer = expressApp.listen(serverPort, 'localhost', () => {
