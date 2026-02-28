@@ -145,6 +145,9 @@ if [ $1 -eq 0 ] ; then
 fi
 
 %changelog
+* Sat Feb 28 2026 Pau Aliagas <linuxnow@gmail.com> - 0.5.19-1
+- PDF multi-page cycling, SSL cert relaxation (relaxSslCerts), configurable log levels, config passthrough fixes
+
 * Sat Feb 28 2026 Pau Aliagas <linuxnow@gmail.com> - 0.5.18-1
 - Fix proxy crash, improve kill patterns, forward proxy logs to DevTools
 
