@@ -63,6 +63,7 @@ const CONFIG_DEFAULTS = {
   fullscreen: true,
   hideMouseCursor: true,
   preventSleep: true,
+  logLevel: '',
   width: 1920,
   height: 1080,
 };
@@ -365,7 +366,8 @@ function createWindow() {
   // Load PWA from local server at /player/
   // In dev mode, enable DEBUG logging via URL param (logger defaults to WARNING)
   const serverPort = cliPort || config.serverPort;
-  const logParam = isDev ? '?logLevel=DEBUG' : '';
+  const logLevel = isDev ? 'DEBUG' : (config.logLevel || '');
+  const logParam = logLevel ? `?logLevel=${logLevel}` : '';
   const url = `http://localhost:${serverPort}/player/${logParam}`;
 
   console.log(`[Window] Loading URL: ${url}`);
