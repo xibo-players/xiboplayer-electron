@@ -145,6 +145,9 @@ if [ $1 -eq 0 ] ; then
 fi
 
 %changelog
+* Sat Feb 28 2026 Pau Aliagas <linuxnow@gmail.com> - 0.5.18-1
+- Fix
+
 * Sat Feb 28 2026 Pau Aliagas <linuxnow@gmail.com> - 0.5.17-1
 - Decouple
 
