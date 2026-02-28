@@ -171,10 +171,10 @@ function getPwaPath() {
 }
 
 /**
- * Clear Service Worker registrations when the bundled PWA version changes.
- * Reads version from the PWA's package.json and compares with the stored
- * version in .pwa-version file.  On mismatch, wipes SW + caches so the new
- * build starts clean (no stale content-hashed assets).
+ * Track the bundled PWA version.  On version change, only clear Code Cache
+ * (V8 bytecode compiled from old JS — can cause crashes with new code).
+ * Service Worker and Cache are NOT wiped: the SW self-updates on install,
+ * media lives in ContentStore/IndexedDB, and the kiosk may be offline.
  */
 async function clearStaleServiceWorker() {
   try {
@@ -184,15 +184,14 @@ async function clearStaleServiceWorker() {
     const lastVersion = readPwaVersion();
 
     if (lastVersion && lastVersion !== pwaVersion) {
-      console.log(`[SW-Clean] PWA version changed: ${lastVersion} → ${pwaVersion}, clearing session data`);
+      console.log(`[SW-Clean] PWA version changed: ${lastVersion} → ${pwaVersion}`);
       const sessionDir = app.getPath('sessionData');
-      const dirs = ['Service Worker', 'Cache', 'Code Cache', 'blob_storage'];
-      for (const dir of dirs) {
+      // Only clear Code Cache — V8 bytecode compiled from old JS
+      for (const dir of ['Code Cache']) {
         const target = path.join(sessionDir, dir);
-        try {
-          fs.rmSync(target, { recursive: true, force: true });
-        } catch (_) {}
+        try { fs.rmSync(target, { recursive: true, force: true }); } catch (_) {}
       }
+      console.log('[SW-Clean] Cleared Code Cache (SW and media cache preserved)');
     } else if (!lastVersion) {
       console.log(`[SW-Clean] First run, recording PWA version ${pwaVersion}`);
     }
