@@ -9,7 +9,7 @@
 
 Name:           xiboplayer-electron
 Version:        %{_version}
-Release:        3%{?dist}
+Release:        1%{?dist}
 Summary:        Xibo digital signage player (Electron)
 
 License:        AGPL-3.0-or-later
@@ -145,6 +145,9 @@ if [ $1 -eq 0 ] ; then
 fi
 
 %changelog
+* Sat Feb 28 2026 Pau Aliagas <linuxnow@gmail.com> - 0.5.17-1
+- Decouple
+
 * Fri Feb 27 2026 Pau Aliagas <linuxnow@gmail.com> - 0.5.16-3
 - Add system default config.json for first-run copy to user config directory
 - Install full config reference (config.json.example) and docs to /usr/share/doc
