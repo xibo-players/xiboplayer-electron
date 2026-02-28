@@ -345,6 +345,40 @@ function createWindow() {
 
   console.log('[Session] CORS headers and preflight handling configured');
 
+  // ─── Accept invalid certificates for media/stream URLs ──────────────
+  // Digital signage often loads HLS streams or media from servers with
+  // self-signed or expired certificates. Accept these for non-CMS URLs
+  // (CMS API calls must still use valid certificates for security).
+  const cmsHost = config.cmsUrl ? new URL(config.cmsUrl).host : null;
+
+  app.on('certificate-error', (event, _webContents, url, error, _certificate, callback) => {
+    try {
+      const urlHost = new URL(url).host;
+      // Never bypass cert errors for CMS or localhost — those must be valid
+      if (cmsHost && urlHost === cmsHost) {
+        callback(false);
+        return;
+      }
+      if (urlHost === 'localhost' || urlHost.startsWith('127.')) {
+        callback(false);
+        return;
+      }
+      // Accept invalid certs for media/stream URLs and warn
+      event.preventDefault();
+      console.warn(`[Security] Accepted invalid certificate for media URL: ${url} (${error})`);
+      callback(true);
+
+      // Notify renderer to show warning in overlay
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.send('cert-warning', { url, host: urlHost, error });
+      }
+    } catch {
+      callback(false);
+    }
+  });
+
+  console.log('[Session] Certificate handling configured (media streams: permissive, CMS: strict)');
+
   // ─── Forward Service Worker console logs to main process ────────────
   // SW logs don't appear in webContents.on('console-message'). This
   // captures them so they show up in /tmp/electron-pwa.log alongside

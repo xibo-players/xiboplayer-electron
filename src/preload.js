@@ -45,6 +45,13 @@ contextBridge.exposeInMainWorld('electronAPI', {
   restartApp: () => ipcRenderer.send('restart-app'),
 });
 
+// Forward certificate warnings from main process → renderer
+ipcRenderer.on('cert-warning', (_event, { url, host, error }) => {
+  console.warn(`[Security] Invalid certificate accepted for: ${host} (${error})`);
+  // Dispatch custom event so overlays can pick it up
+  window.dispatchEvent(new CustomEvent('cert-warning', { detail: { url, host, error } }));
+});
+
 // Forward proxy logs from main process → renderer DevTools console
 ipcRenderer.on('proxy-log', (_event, { level, name, args }) => {
   const prefix = `[${name}]`;
