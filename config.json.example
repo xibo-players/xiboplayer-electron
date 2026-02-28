@@ -2,6 +2,7 @@
   "cmsUrl": "",
   "cmsKey": "",
   "displayName": "",
+
   "serverPort": 8765,
 
   "kioskMode": true,
@@ -13,7 +14,6 @@
   "height": 1080,
 
   "transport": "auto",
-
   "googleGeoApiKey": "",
 
   "controls": {
