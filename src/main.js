@@ -65,6 +65,7 @@ const CONFIG_DEFAULTS = {
   preventSleep: true,
   logLevel: '',
   relaxSslCerts: true,
+  playerApiBase: '/api/v2/player',
   width: 1920,
   height: 1080,
 };
