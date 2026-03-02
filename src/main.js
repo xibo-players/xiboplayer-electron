@@ -68,6 +68,17 @@ const CONFIG_DEFAULTS = {
   playerApiBase: '/api/v2/player',
   width: 1920,
   height: 1080,
+  controls: {
+    keyboard: {
+      debugOverlays: false,
+      setupKey: false,
+      playbackControl: false,
+      videoControls: false,
+    },
+    mouse: {
+      statusBarOnHover: false,
+    },
+  },
 };
 
 const configDir = process.env.XDG_CONFIG_HOME || path.join(os.homedir(), '.config');
@@ -215,20 +226,10 @@ async function createExpressServer() {
   console.log(`[Express] PWA path: ${pwaPath}`);
   console.log(`[Express] Starting server on port: ${serverPort}`);
 
-  // Pass all config fields to the PWA except Electron-only window settings.
-  // This ensures new config.json fields (e.g. logLevel) automatically reach
-  // the PWA's localStorage without needing code changes here.
-  const ELECTRON_ONLY_KEYS = new Set([
-    'serverPort', 'kioskMode', 'autoLaunch', 'fullscreen',
-    'hideMouseCursor', 'preventSleep', 'width', 'height',
-  ]);
-
-  const pwaConfig = {};
-  for (const [key, value] of Object.entries(config)) {
-    if (!ELECTRON_ONLY_KEYS.has(key)) {
-      pwaConfig[key] = value;
-    }
-  }
+  // Extract PWA config — shared helper filters out common shell keys,
+  // we only add Electron-specific extras here.
+  const { extractPwaConfig } = await import('@xiboplayer/utils/config');
+  const pwaConfig = extractPwaConfig(config, ['autoLaunch']);
 
   const { createProxyApp } = await import('@xiboplayer/proxy');
   const dataDir = app.getPath('sessionData');
@@ -243,7 +244,7 @@ async function createExpressServer() {
 
   const expressApp = createProxyApp({
     pwaPath, appVersion: APP_VERSION,
-    pwaConfig: config.cmsUrl ? pwaConfig : undefined,
+    pwaConfig,
     configFilePath, dataDir, onLog,
   });
 
