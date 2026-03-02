@@ -48,4 +48,5 @@ jobs:
       deb-output-dir: dist-packages
       arch-matrix: '["amd64", "arm64"]'
       gpg-sign: true
+      publish-to-repo: false
     secrets: inherit
