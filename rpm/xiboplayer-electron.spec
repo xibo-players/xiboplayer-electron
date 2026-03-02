@@ -145,6 +145,9 @@ if [ $1 -eq 0 ] ; then
 fi
 
 %changelog
+* Mon Mar 02 2026 Pau Aliagas <linuxnow@gmail.com> - 0.6.0-1
+- REST v2 transport with auto-detection, chunked download resume, shared config extraction (extractPwaConfig), cert warning overlay fix, download overlay fix
+
 * Sun Mar 01 2026 Pau Aliagas <linuxnow@gmail.com> - 0.5.20-1
 - Fix memory leaks: PDF single-canvas rendering with page.cleanup(), event listener cleanup on widget hide, HLS instance destroy, blob URL tracking
 
