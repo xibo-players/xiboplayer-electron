@@ -18,9 +18,41 @@ const fs = require('fs');
 const AutoLaunch = require('electron-auto-launch');
 const os = require('os');
 
+/**
+ * Parse a --key=value CLI argument.
+ * @param {string} key - Argument name (without --)
+ * @param {'string'|'int'} [type='string'] - Value type
+ * @param {*} [defaultValue=null] - Default if not found
+ */
+function parseArgument(key, type = 'string', defaultValue = null) {
+  const arg = process.argv.find(a => a.startsWith(`--${key}=`));
+  if (!arg) return defaultValue;
+  const value = arg.split('=').slice(1).join('=');
+  return type === 'int' ? parseInt(value, 10) : value;
+}
+
+/**
+ * Remove directories from an Electron session path.
+ * @param {string} sessionDir - Base session directory
+ * @param {string[]} dirNames - Subdirectory names to remove
+ */
+function clearSessionDirectories(sessionDir, dirNames) {
+  for (const dir of dirNames) {
+    try { fs.rmSync(path.join(sessionDir, dir), { recursive: true, force: true }); } catch (_) {}
+  }
+}
+
+/** CORS response headers injected into all Electron webRequest responses */
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': ['*'],
+  'Access-Control-Allow-Methods': ['GET, POST, PUT, DELETE, OPTIONS'],
+  'Access-Control-Allow-Headers': ['Content-Type, SOAPAction, Authorization, Accept'],
+  'Access-Control-Max-Age': ['86400'],
+};
+const CORS_HEADER_KEYS = new Set(Object.keys(CORS_HEADERS).map(k => k.toLowerCase()));
+
 // Parse --instance=NAME early (before app paths are used)
-const instanceArg = process.argv.find(arg => arg.startsWith('--instance='));
-const instanceName = instanceArg ? instanceArg.split('=').slice(1).join('=') : '';
+const instanceName = parseArgument('instance', 'string', '');
 const instanceSuffix = instanceName ? `electron-${instanceName}` : 'electron';
 
 // XDG-compliant paths: config in ~/.config, data in ~/.local/share
@@ -148,39 +180,32 @@ let powerSaveBlockerId = null;
 const isDev = process.argv.includes('--dev');
 const noKiosk = process.argv.includes('--no-kiosk');
 
-// Parse --port=XXXX argument
-const portArg = process.argv.find(arg => arg.startsWith('--port='));
-const cliPort = portArg ? parseInt(portArg.split('=')[1], 10) : null;
-
-// Parse --cms-url=URL and --cms-key=KEY for auto-config injection
-// CLI args are non-persistent — merged into in-memory config only.
-const cmsUrlArg = process.argv.find(arg => arg.startsWith('--cms-url='));
-const cmsKeyArg = process.argv.find(arg => arg.startsWith('--cms-key='));
-const displayNameArg = process.argv.find(arg => arg.startsWith('--display-name='));
-if (cmsUrlArg) config.cmsUrl = cmsUrlArg.split('=').slice(1).join('=');
-if (cmsKeyArg) config.cmsKey = cmsKeyArg.split('=').slice(1).join('=');
-if (displayNameArg) config.displayName = displayNameArg.split('=').slice(1).join('=');
+// Parse CLI arguments for auto-config injection (non-persistent, in-memory only)
+const cliPort = parseArgument('port', 'int', null);
+const cliCmsUrl = parseArgument('cms-url');
+const cliCmsKey = parseArgument('cms-key');
+const cliDisplayName = parseArgument('display-name');
+if (cliCmsUrl) config.cmsUrl = cliCmsUrl;
+if (cliCmsKey) config.cmsKey = cliCmsKey;
+if (cliDisplayName) config.displayName = cliDisplayName;
 
 // No CMS URL → unconfigured.
 // Wipe stale session data so the PWA shows the setup screen
 // instead of booting from a ghost config left by a previous session.
 if (!config.cmsUrl) {
-  const sessionDir = app.getPath('sessionData');
-  for (const dir of ['Local Storage', 'IndexedDB', 'Service Worker', 'Cache', 'Code Cache']) {
-    try { fs.rmSync(path.join(sessionDir, dir), { recursive: true, force: true }); } catch (_) {}
-  }
+  clearSessionDirectories(app.getPath('sessionData'), ['Local Storage', 'IndexedDB', 'Service Worker', 'Cache', 'Code Cache']);
   console.log('[Config] Unconfigured — cleared stale session data');
 }
 
 // Parse --pwa-path=/path/to/dist for local development builds
-const pwaPathArg = process.argv.find(arg => arg.startsWith('--pwa-path='));
+const pwaPathArg = parseArgument('pwa-path');
 
 /**
  * Get the path to PWA dist files.
  * Priority: --pwa-path CLI arg > node_modules (production / installed)
  */
 function getPwaPath() {
-  if (pwaPathArg) return pwaPathArg.split('=').slice(1).join('=');
+  if (pwaPathArg) return pwaPathArg;
   return path.join(__dirname, '../node_modules/@xiboplayer/pwa/dist');
 }
 
@@ -201,10 +226,7 @@ async function clearStaleServiceWorker() {
       console.log(`[SW-Clean] PWA version changed: ${lastVersion} → ${pwaVersion}`);
       const sessionDir = app.getPath('sessionData');
       // Only clear Code Cache — V8 bytecode compiled from old JS
-      for (const dir of ['Code Cache']) {
-        const target = path.join(sessionDir, dir);
-        try { fs.rmSync(target, { recursive: true, force: true }); } catch (_) {}
-      }
+      clearSessionDirectories(sessionDir, ['Code Cache']);
       console.log('[SW-Clean] Cleared Code Cache (SW and media cache preserved)');
     } else if (!lastVersion) {
       console.log(`[SW-Clean] First run, recording PWA version ${pwaVersion}`);
@@ -318,20 +340,11 @@ function createWindow() {
     // (e.g. SWAG/nginx already adds Access-Control-Allow-Origin: *,
     //  and a second * from us makes the browser reject the response)
     for (const key of Object.keys(headers)) {
-      const lk = key.toLowerCase();
-      if (lk === 'access-control-allow-origin' ||
-          lk === 'access-control-allow-methods' ||
-          lk === 'access-control-allow-headers' ||
-          lk === 'access-control-max-age') {
-        delete headers[key];
-      }
+      if (CORS_HEADER_KEYS.has(key.toLowerCase())) delete headers[key];
     }
 
     // Set CORS headers (single source of truth)
-    headers['Access-Control-Allow-Origin'] = ['*'];
-    headers['Access-Control-Allow-Methods'] = ['GET, POST, PUT, DELETE, OPTIONS'];
-    headers['Access-Control-Allow-Headers'] = ['Content-Type, SOAPAction, Authorization, Accept'];
-    headers['Access-Control-Max-Age'] = ['86400'];
+    Object.assign(headers, CORS_HEADERS);
 
     // For OPTIONS preflight responses that return non-2xx status,
     // override to 200 so the browser CORS check passes
