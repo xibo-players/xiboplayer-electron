@@ -12,7 +12,7 @@
  * - Session-level CORS headers for direct CMS requests from the renderer
  */
 
-const { app, BrowserWindow, ipcMain, powerSaveBlocker, globalShortcut, Menu, Tray, dialog, nativeImage, desktopCapturer } = require('electron');
+const { app, BrowserWindow, ipcMain, powerSaveBlocker, Menu, Tray, dialog, nativeImage, desktopCapturer } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const AutoLaunch = require('electron-auto-launch');
@@ -413,8 +413,35 @@ function createWindow() {
     callback({ video: selfSource, audio: 'loopback' });
   });
 
-  // Hide menu bar
-  Menu.setApplicationMenu(null);
+  // Application menu — accelerators work on Wayland (unlike globalShortcut)
+  const menuTemplate = [
+    {
+      label: 'Player',
+      submenu: [
+        { label: 'Reload', accelerator: 'CmdOrCtrl+Shift+R', click: () => mainWindow.reload() },
+        { type: 'separator' },
+        {
+          label: 'Restart',
+          click: () => { app.relaunch(); app.isQuitting = true; app.quit(); },
+        },
+        {
+          label: 'Exit Player',
+          accelerator: 'CmdOrCtrl+Q',
+          click: () => { app.isQuitting = true; app.quit(); },
+        },
+      ],
+    },
+  ];
+  if (isDev) {
+    menuTemplate.push({
+      label: 'Dev',
+      submenu: [
+        { label: 'Toggle DevTools', accelerator: 'CmdOrCtrl+Shift+I', click: () => mainWindow.webContents.toggleDevTools() },
+      ],
+    });
+  }
+  Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
+  mainWindow.setAutoHideMenuBar(true);
 
   // Load PWA from local server at /player/
   // In dev mode, enable DEBUG logging via URL param (logger defaults to WARNING)
@@ -441,12 +468,9 @@ function createWindow() {
     }
   });
 
-  // Prevent accidental window close in kiosk mode
-  mainWindow.on('close', (event) => {
-    if (!app.isQuitting && kioskMode) {
-      event.preventDefault();
-      return false;
-    }
+  // Let Alt+F4 / window-manager close quit cleanly
+  mainWindow.on('close', () => {
+    app.isQuitting = true;
   });
 
   // Open DevTools in dev mode
@@ -691,37 +715,18 @@ User data: ${app.getPath('userData')}`,
 /**
  * Setup global keyboard shortcuts
  */
-function setupGlobalShortcuts() {
-  // Show system tray menu with Ctrl+Shift+F12
-  globalShortcut.register('CommandOrControl+Shift+F12', () => {
-    console.log('[Shortcut] Showing system tray menu');
-    if (tray) {
-      tray.popUpContextMenu();
+function setupKeyboardShortcuts() {
+  // Use before-input-event for shortcuts not covered by Menu accelerators.
+  // (globalShortcut silently fails on Wayland)
+  if (!mainWindow) return;
+
+  mainWindow.webContents.on('before-input-event', (event, input) => {
+    if (input.type !== 'keyDown') return;
+    if ((input.control || input.meta) && input.shift && input.key === 'F12') {
+      console.log('[Shortcut] Showing system tray menu');
+      if (tray) tray.popUpContextMenu();
+      event.preventDefault();
     }
-  });
-
-  // Reload page with Ctrl+Shift+R
-  globalShortcut.register('CommandOrControl+Shift+R', () => {
-    console.log('[Shortcut] Reloading page');
-    if (mainWindow) {
-      mainWindow.reload();
-    }
-  });
-
-  // Toggle DevTools with Ctrl+Shift+I (dev mode only)
-  if (isDev) {
-    globalShortcut.register('CommandOrControl+Shift+I', () => {
-      if (mainWindow) {
-        mainWindow.webContents.toggleDevTools();
-      }
-    });
-  }
-
-  // Emergency exit with Ctrl+Shift+Q
-  globalShortcut.register('CommandOrControl+Shift+Q', () => {
-    console.log('[Shortcut] Emergency exit');
-    app.isQuitting = true;
-    app.quit();
   });
 }
 
@@ -845,7 +850,7 @@ app.whenReady().then(async () => {
   // Setup system integrations
   preventSystemSleep();
   createSystemTray();
-  setupGlobalShortcuts();
+  setupKeyboardShortcuts();
   setupIpcHandlers();
 
   // Setup auto-launch if enabled
@@ -873,9 +878,6 @@ app.on('activate', () => {
  * Cleanup on quit
  */
 app.on('will-quit', () => {
-  // Unregister all global shortcuts
-  globalShortcut.unregisterAll();
-
   // Stop power save blocker
   if (powerSaveBlockerId !== null) {
     powerSaveBlocker.stop(powerSaveBlockerId);
