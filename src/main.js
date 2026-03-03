@@ -78,6 +78,32 @@ app.commandLine.appendSwitch('disable-gpu-watchdog');
 app.commandLine.appendSwitch('disable-background-timer-throttling');
 app.commandLine.appendSwitch('disable-renderer-backgrounding');
 
+// Adaptive memory tuning — scale V8 heap and raster threads to hardware.
+// Player JS is lightweight; the big consumers are video decode buffers (VAAPI)
+// and Chromium's GPU compositing, which we can't cap without losing HW accel.
+const totalRAM_GB = Math.round(os.totalmem() / (1024 ** 3));
+const cpuCount = os.cpus().length;
+
+let maxOldSpaceMB, rasterThreads;
+if (totalRAM_GB <= 1) {
+  maxOldSpaceMB = 128;
+  rasterThreads = 1;
+} else if (totalRAM_GB <= 2) {
+  maxOldSpaceMB = 192;
+  rasterThreads = 2;
+} else if (totalRAM_GB <= 4) {
+  maxOldSpaceMB = 256;
+  rasterThreads = Math.min(cpuCount, 2);
+} else {
+  maxOldSpaceMB = 384;
+  rasterThreads = Math.min(cpuCount, 4);
+}
+
+app.commandLine.appendSwitch('js-flags', `--max-old-space-size=${maxOldSpaceMB}`);
+app.commandLine.appendSwitch('num-raster-threads', String(rasterThreads));
+app.commandLine.appendSwitch('gpu-rasterization-msaa-sample-count', '0');
+console.log(`[Memory] ${totalRAM_GB}GB RAM, ${cpuCount} CPUs → V8 heap ${maxOldSpaceMB}MB, ${rasterThreads} raster threads`);
+
 // Version
 const APP_VERSION = '0.2.1';
 
