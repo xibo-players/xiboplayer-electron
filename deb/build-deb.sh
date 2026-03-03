@@ -4,21 +4,24 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ELECTRON_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
-VERSION="${1:-0.6.0}"
-NAME="xiboplayer-electron"
+source "${PKG_LIB_DEB:-${SCRIPT_DIR}/scripts/packaging/lib-deb.sh}"
 
-# Detect architecture
-case "$(uname -m)" in
-    x86_64)  ARCH="amd64"; ELECTRON_ARCH="x64" ;;
-    aarch64) ARCH="arm64"; ELECTRON_ARCH="arm64" ;;
-    *)       echo "ERROR: Unsupported architecture: $(uname -m)"; exit 1 ;;
-esac
+# ── Configuration ─────────────────────────────────────────────────────
+PKG_NAME="xiboplayer-electron"
+PKG_DEPENDS="libgtk-3-0, libnss3, libasound2, libgbm1, libatspi2.0-0, libxtst6, xdg-utils"
+PKG_CONFLICTS="xiboplayer-pwa"
+PKG_DESCRIPTION="Xibo digital signage player (Electron)"
+PKG_DESCRIPTION_LONG=" Xibo Player wrapped in Electron for desktop and kiosk digital signage.
+ Provides a native application with built-in HTTP server, offline support,
+ system tray integration, and automatic launch via systemd."
+PKG_SRC_BUILD_DEPENDS="debhelper (>= 12), nodejs, npm"
 
-echo "==> Building $NAME DEB v$VERSION for $ARCH"
+DIST_DIR="$ELECTRON_DIR/dist-packages"
 
-# Detect the electron-builder output directory
-# For x64: linux-unpacked
-# For other architectures: linux-{arch}-unpacked
+# ── Architecture & build artifact detection ───────────────────────────
+pkg_detect_arch
+pkg_parse_version "$@"
+
 if [ -d "$ELECTRON_DIR/dist-packages/linux-unpacked" ]; then
     LINUX_UNPACKED="linux-unpacked"
 elif [ -d "$ELECTRON_DIR/dist-packages/linux-${ELECTRON_ARCH}-unpacked" ]; then
@@ -29,34 +32,28 @@ else
     echo "       Run 'pnpm run build:linux' first"
     exit 1
 fi
-
 echo "==> Using build artifacts from: $LINUX_UNPACKED"
 
-# Create DEB package directory structure
-DEB_DIR="$ELECTRON_DIR/deb-pkg/$NAME"
-rm -rf "$DEB_DIR"
-mkdir -p "$DEB_DIR/DEBIAN"
-mkdir -p "$DEB_DIR/usr/bin"
-mkdir -p "$DEB_DIR/usr/lib/xiboplayer"
-mkdir -p "$DEB_DIR/usr/share/applications"
-mkdir -p "$DEB_DIR/usr/share/icons/hicolor/256x256/apps"
-mkdir -p "$DEB_DIR/usr/lib/systemd/user"
+# ── Create package tree ───────────────────────────────────────────────
+BUILD_ROOT="$ELECTRON_DIR/deb-pkg"
+pkg_create_deb_tree
+mkdir -p "$PKGDIR/usr/lib/xiboplayer"
 
 echo "==> Installing files..."
 
 # Copy Electron app bundle
-cp -a "$ELECTRON_DIR/dist-packages/$LINUX_UNPACKED/"* "$DEB_DIR/usr/lib/xiboplayer/"
+cp -a "$ELECTRON_DIR/dist-packages/$LINUX_UNPACKED/"* "$PKGDIR/usr/lib/xiboplayer/"
 
-# Create wrapper script
-cat > "$DEB_DIR/usr/bin/xiboplayer" << 'WRAPPER'
+# Wrapper script
+cat > "$PKGDIR/usr/bin/xiboplayer" << 'WRAPPER'
 #!/bin/bash
 # Xibo Player (Electron) — launcher
 exec /usr/lib/xiboplayer/xiboplayer "$@"
 WRAPPER
-chmod 755 "$DEB_DIR/usr/bin/xiboplayer"
+chmod 755 "$PKGDIR/usr/bin/xiboplayer"
 
 # Desktop entry
-cat > "$DEB_DIR/usr/share/applications/xiboplayer.desktop" << 'DESKTOP'
+cat > "$PKGDIR/usr/share/applications/xiboplayer.desktop" << 'DESKTOP'
 [Desktop Entry]
 Name=Xibo Player
 Comment=Digital Signage Player for Xibo CMS
@@ -69,26 +66,23 @@ Keywords=signage;digital;kiosk;xibo;
 StartupWMClass=xiboplayer
 DESKTOP
 
-# Minimal config (copied to ~/.config/xiboplayer/ on first run)
-mkdir -p "$DEB_DIR/usr/share/$NAME"
-install -m644 "$ELECTRON_DIR/config.json" "$DEB_DIR/usr/share/$NAME/config.json"
+# Config and docs
+mkdir -p "$PKGDIR/usr/share/$PKG_NAME"
+install -m644 "$ELECTRON_DIR/config.json" "$PKGDIR/usr/share/$PKG_NAME/config.json"
+cp "$ELECTRON_DIR/config.json.example" "$PKGDIR/usr/share/doc/$PKG_NAME/"
+cp "$ELECTRON_DIR/CONFIG.md" "$PKGDIR/usr/share/doc/$PKG_NAME/"
+cp "$ELECTRON_DIR/README.md" "$PKGDIR/usr/share/doc/$PKG_NAME/"
 
-# Full config reference + documentation
-mkdir -p "$DEB_DIR/usr/share/doc/$NAME"
-cp "$ELECTRON_DIR/config.json.example" "$DEB_DIR/usr/share/doc/$NAME/"
-cp "$ELECTRON_DIR/CONFIG.md" "$DEB_DIR/usr/share/doc/$NAME/"
-cp "$ELECTRON_DIR/README.md" "$DEB_DIR/usr/share/doc/$NAME/"
-
-# Copy icon if available
-if [ -f "$DEB_DIR/usr/lib/xiboplayer/resources/app.asar.unpacked/resources/pwa/favicon.png" ]; then
-    cp "$DEB_DIR/usr/lib/xiboplayer/resources/app.asar.unpacked/resources/pwa/favicon.png" \
-       "$DEB_DIR/usr/share/icons/hicolor/256x256/apps/xiboplayer.png"
+# Icon
+if [ -f "$PKGDIR/usr/lib/xiboplayer/resources/app.asar.unpacked/resources/pwa/favicon.png" ]; then
+    cp "$PKGDIR/usr/lib/xiboplayer/resources/app.asar.unpacked/resources/pwa/favicon.png" \
+       "$PKGDIR/usr/share/icons/hicolor/256x256/apps/xiboplayer.png"
 else
     echo "Warning: Icon not found in unpacked resources, skipping"
 fi
 
 # Systemd user service
-cat > "$DEB_DIR/usr/lib/systemd/user/xiboplayer.service" << 'SERVICE'
+cat > "$PKGDIR/usr/lib/systemd/user/xiboplayer.service" << 'SERVICE'
 [Unit]
 Description=Xibo Player - Digital Signage (Electron)
 After=graphical-session.target
@@ -113,118 +107,24 @@ SyslogIdentifier=xiboplayer
 WantedBy=graphical-session.target
 SERVICE
 
-# Calculate installed size (in KB)
-INSTALLED_SIZE=$(du -sk "$DEB_DIR" | cut -f1)
+# ── Package ───────────────────────────────────────────────────────────
+pkg_write_control
+pkg_build_binary_deb
+pkg_show_result_deb
 
-# Create control file
-cat > "$DEB_DIR/DEBIAN/control" << EOF
-Package: xiboplayer-electron
-Version: ${VERSION}
-Section: misc
-Priority: optional
-Architecture: ${ARCH}
-Installed-Size: ${INSTALLED_SIZE}
-Depends: libgtk-3-0, libnss3, libasound2, libgbm1, libatspi2.0-0, libxtst6, xdg-utils
-Conflicts: xiboplayer-pwa
-Maintainer: Pau Aliagas <linuxnow@gmail.com>
-Description: Xibo digital signage player (Electron)
- Xibo Player wrapped in Electron for desktop and kiosk digital signage.
- Provides a native application with built-in HTTP server, offline support,
- system tray integration, and automatic launch via systemd.
-Homepage: https://xiboplayer.org
-EOF
-
-# Build DEB package
-echo "==> Building DEB package..."
-DEB_FILE="${NAME}_${VERSION}_${ARCH}.deb"
-dpkg-deb --build "$DEB_DIR" "$ELECTRON_DIR/dist-packages/$DEB_FILE"
-
-# Show result
-if [ -f "$ELECTRON_DIR/dist-packages/$DEB_FILE" ]; then
-    echo ""
-    echo "==> Built: $DEB_FILE ($(du -h "$ELECTRON_DIR/dist-packages/$DEB_FILE" | cut -f1))"
-    echo "    Install: sudo apt install $ELECTRON_DIR/dist-packages/$DEB_FILE"
-    echo "    Enable:  systemctl --user enable --now xiboplayer.service"
-else
-    echo "ERROR: DEB not found in dist-packages/"
-    exit 1
-fi
-
-# Clean up binary build
-rm -rf "$DEB_DIR"
-
-# --- Build source package (once, arch-independent) ---
-SRC_MARKER="$ELECTRON_DIR/dist-packages/.source-built"
-if [ ! -f "$SRC_MARKER" ]; then
-    echo "==> Building source package..."
-    SRC_BUILD="$ELECTRON_DIR/deb-src"
-    rm -rf "$SRC_BUILD"
-    SRC_NAME="${NAME}-${VERSION}"
-    mkdir -p "$SRC_BUILD/$SRC_NAME"
-
-    # Create orig tarball from repo source (exclude build artifacts)
-    tar czf "$SRC_BUILD/${NAME}_${VERSION}.orig.tar.gz" \
+# ── Source package ────────────────────────────────────────────────────
+populate_electron_source() {
+    local orig_dir="$1"
+    tar czf "$orig_dir/../${PKG_NAME}_${VERSION}.orig.tar.gz" \
         -C "$ELECTRON_DIR" \
         --exclude=dist-packages --exclude=deb-pkg --exclude=deb-src \
         --exclude=node_modules --exclude=.git \
-        --transform="s|^\.|${SRC_NAME}|" .
+        --transform="s|^\.|${PKG_NAME}-${VERSION}|" .
+    # Extract into orig_dir for dpkg-source
+    cd "$orig_dir/.."
+    rm -rf "$orig_dir"
+    tar xf "${PKG_NAME}_${VERSION}.orig.tar.gz"
+}
 
-    # Extract for dpkg-source
-    cd "$SRC_BUILD"
-    tar xf "${NAME}_${VERSION}.orig.tar.gz"
-
-    # Create debian/ directory
-    mkdir -p "$SRC_BUILD/$SRC_NAME/debian/source"
-    echo "3.0 (quilt)" > "$SRC_BUILD/$SRC_NAME/debian/source/format"
-
-    cat > "$SRC_BUILD/$SRC_NAME/debian/control" << EOF
-Source: ${NAME}
-Section: misc
-Priority: optional
-Maintainer: Pau Aliagas <linuxnow@gmail.com>
-Build-Depends: debhelper (>= 12), nodejs, npm
-Standards-Version: 4.6.0
-Homepage: https://xiboplayer.org
-
-Package: ${NAME}
-Architecture: any
-Depends: libgtk-3-0, libnss3, libasound2, libgbm1, libatspi2.0-0, libxtst6, xdg-utils
-Description: Xibo digital signage player (Electron)
- Xibo Player wrapped in Electron for desktop and kiosk digital signage.
- Provides a native application with built-in HTTP server, offline support,
- system tray integration, and automatic launch via systemd.
-EOF
-
-    cat > "$SRC_BUILD/$SRC_NAME/debian/changelog" << EOF
-${NAME} (${VERSION}) stable; urgency=medium
-
-  * Release ${VERSION}
-
- -- Pau Aliagas <linuxnow@gmail.com>  $(date -R)
-EOF
-
-    cat > "$SRC_BUILD/$SRC_NAME/debian/rules" << 'EOF'
-#!/usr/bin/make -f
-%:
-	dh $@
-EOF
-    chmod +x "$SRC_BUILD/$SRC_NAME/debian/rules"
-
-    echo "12" > "$SRC_BUILD/$SRC_NAME/debian/compat"
-
-    # Build source package
-    cd "$SRC_BUILD/$SRC_NAME"
-    dpkg-source -b .
-    cd "$SCRIPT_DIR"
-
-    # Copy source package files to output
-    cp "$SRC_BUILD"/*.dsc "$ELECTRON_DIR/dist-packages/" 2>/dev/null || true
-    cp "$SRC_BUILD"/*.orig.tar.* "$ELECTRON_DIR/dist-packages/" 2>/dev/null || true
-    cp "$SRC_BUILD"/*.debian.tar.* "$ELECTRON_DIR/dist-packages/" 2>/dev/null || true
-
-    echo "==> Source package files:"
-    ls -lh "$ELECTRON_DIR/dist-packages/"*.dsc "$ELECTRON_DIR/dist-packages/"*.tar.* 2>/dev/null || true
-
-    touch "$SRC_MARKER"
-    rm -rf "$SRC_BUILD"
-fi
+PKG_ARCH="any"
+pkg_build_source_deb populate_electron_source any
