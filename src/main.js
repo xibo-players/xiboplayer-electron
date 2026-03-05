@@ -305,6 +305,7 @@ async function createExpressServer() {
     pwaPath, appVersion: APP_VERSION,
     pwaConfig,
     configFilePath, dataDir, onLog,
+    allowShellCommands: !!config.allowShellCommands,
   });
 
   // Start server
