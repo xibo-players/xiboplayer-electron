@@ -276,8 +276,14 @@ async function createExpressServer() {
 
   // Extract PWA config — shared helper filters out common shell keys,
   // we only add Electron-specific extras here.
-  const { extractPwaConfig } = await import('@xiboplayer/utils/config');
+  const { extractPwaConfig, computeCmsId } = await import('@xiboplayer/utils/config');
   const pwaConfig = extractPwaConfig(config, ['autoLaunch']);
+
+  // Inject CMS ID for per-CMS cache namespacing
+  if (pwaConfig && config.cmsUrl) {
+    const cmsId = computeCmsId(config.cmsUrl);
+    if (cmsId) pwaConfig.cmsId = cmsId;
+  }
 
   const { createProxyApp } = await import('@xiboplayer/proxy');
   const dataDir = app.getPath('sessionData');
